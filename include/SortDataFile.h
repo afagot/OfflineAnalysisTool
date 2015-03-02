@@ -1,3 +1,9 @@
+// **********************************************************************
+// *   Hit sorting functions
+// *   Alexis Fagot
+// *   2/3/2015
+// *********************************************************************
+
 #ifndef SORTDATAFILE_H
 #define SORTDATAFILE_H
 
@@ -12,9 +18,8 @@
 
 using namespace std;
 
-bool SortPairs(pair<int,int>,pair<int,int>);
-void SortStrips(string);
-void SortTime(string);
-void SortDataFile(string);
+int Partitionning(int,int,int);
+bool SortHits(pair<int,int>,pair<int,int>,string);
+void SortData(string,string);
 
 #endif // SORTDATAFILE_H

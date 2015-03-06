@@ -15,11 +15,13 @@
 #include <vector>
 #include <utility>
 #include <string>
+#include <ctime>
 
 using namespace std;
 
-int Partitionning(int,int,int);
-bool SortHits(pair<int,int>,pair<int,int>,string);
-void SortData(string,string);
+int RandomPivot(int first,int last);
+int Partition(vector< pair<int,int> >& A, int f, int l);
+void SortEvent(vector< pair<int,int> >& A, int f, int l);
+void SortData(string fName);
 
 #endif // SORTDATAFILE_H

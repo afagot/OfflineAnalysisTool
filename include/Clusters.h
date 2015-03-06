@@ -18,10 +18,8 @@
 
 using namespace std;
 
-void AddCluster2List(vector< pair<int,int> >&, vector < vector< pair<int,int> > >&);
-void PrintCluster(int, vector<vector<pair<int, int> > >&, ostream&);
-void StripClusters(string);
-void TimeClusters(string);
-void FinalClusters(string);
+void AddCluster2List(vector< pair<int,int> >& Cluster, vector < vector< pair<int,int> > >& ClusterList);
+void PrintCluster(int Event, vector< vector< pair<int,int> > >& ClusterList, ostream& output);
+void ClustrizeData(string fName);
 
 #endif // CLUSTERS_H

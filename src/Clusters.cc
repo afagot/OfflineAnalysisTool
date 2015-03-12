@@ -5,11 +5,14 @@
 // *********************************************************************
 
 #include "../include/Clusters.h"
+#include "../include/SortDataFile.h"
 #include "../include/MsgSvc.h"
 
 using namespace std;
 
 //*****************************************************************************
+//This function adds the hit array into the cluster list as new cluster and
+//clears the hit array.
 
 void AddCluster2List(vector< pair<int,int> >& Cluster, vector < vector< pair<int,int> > >& ClusterList){
     ClusterList.push_back(Cluster);
@@ -17,8 +20,29 @@ void AddCluster2List(vector< pair<int,int> >& Cluster, vector < vector< pair<int
 }
 
 //*****************************************************************************
+//This function prints the cluster list into the output file. The format is :
 
-void PrintCluster(int Event, vector< vector< pair<int,int> > >& ClusterList, ostream& output){
+//EventLabel    NumberOfClusters
+//Cluster1      NumberOfHits1
+//Hit1          Time1
+//Hit2          Time2
+//...
+//HitN          TimeN
+//Cluster2      NumberOfHits2
+//Hit1          Time1
+//Hit2          Time2
+//...
+//HitN          TimeN
+//...
+//...
+//ClusterN      NumberOfHitsN
+//Hit1          Time1
+//Hit2          Time2
+//...
+//HitN          TimeN
+
+
+void PrintClusters(int Event, vector< vector< pair<int,int> > >& ClusterList, ostream& output){
     output << Event << " " << ClusterList.size() <<endl;
     for(unsigned int c = 0; c < ClusterList.size(); c++){
         output << c+1 << " " << ClusterList[c].size() << endl;
@@ -29,77 +53,107 @@ void PrintCluster(int Event, vector< vector< pair<int,int> > >& ClusterList, ost
 }
 
 //*****************************************************************************
+//Function that returns if the hit is part of the cluster.
 
-void ClustrizeData(string fName){
-    ifstream input(fName.c_str(),ios::in);
+bool IsInCluster(int hit, vector< pair<int,int> > cluster, string option){
+    if(option == "TIME"){                                                           //Time condition for cluters :
+        return hit-cluster.front().second < 100;                                    //10 ns wide (unit = 100 ps).
+    } else if(option == "STRIP"){                                                   //Strip condition for clusters :
+        return hit-cluster.back().first == 1;                                       //neighbor strips.
+    }
+}
 
-    if(input){
-        fName = "CLUSTERIZED_" + fName;
-        ofstream output(fName.c_str(),ios::out);
+//*****************************************************************************
+//Function that groups neighbor hits, among an an array of "on time" hits, in
+//order to make the clusters.
 
-        while(input.good()){
-            int nEvent = 0;
-            int nHits = 0;
+void GroupStrips(vector< pair<int,int> >& tCluster, vector< pair<int,int> >& sCluster, vector< vector< pair<int,int> > >& cList){
+    SortEvent(tCluster,0,tCluster.size()-1,"STRIP");                                //Sort your time array by
+                                                                                    //increasing strip number.
 
-            input >> nEvent >> nHits;
+    for(int h = 0; h < tCluster.size(); h++){                                       //Loop on the time hits.
+        int tStrip = tCluster[h].first;
+        int tTime = tCluster[h].second;
+                                                                                    //If the strip array isn't
+        if(sCluster.size() > 0){                                                    //empty, check if the hit
+            if(IsInCluster(tStrip,sCluster,"STRIP")){                               //is adjacent to the last
+                sCluster.push_back(make_pair(tStrip,tTime));                        //and add it to the array
+            } else {                                                                //or if not, add the array
+                AddCluster2List(sCluster,cList);                                    //to the cluster list,
+                sCluster.clear();                                                   //clear it and reinitialize
+                sCluster.push_back(make_pair(tStrip,tTime));                        //it with this hit.
+            }
+        } else {                                                                    //If the strip array is empty,
+            sCluster.push_back(make_pair(tStrip,tTime));                            //initialise it with this hit.
+        }
+    }                                                                               //In the end, add the last
+    AddCluster2List(sCluster,cList);                                                //content of the array into
+    sCluster.clear();                                                               //the cluster list and clear
+                                                                                   //both time and strip arrays.
+}
 
-            vector< vector< pair<int,int> > > ClusterList;
-            ClusterList.clear();
+//*****************************************************************************
+//Function that analyses a file containing data with hits sorted by time stamp
+//in each event to make a new outputfile the the hits grouped as clusters in
+//each event.
 
-            if(nEvent == 0 && nHits == 0){
-                MSG_INFO("End of the file.");
-                break;
-            } else {
-                vector< pair<int,int> > Cluster;
-                Cluster.clear();
+void Analyse(string fName){
+    ifstream input(fName.c_str(),ios::in);                                          //Open inputfile (data)
 
-                for(int h = 0; h < nHits; h++){
-                    int strip = -1;
-                    int time = 0;
+        if(input){                                                                  //If well open,
+            fName = "CLUSTERIZED_" + fName;                                         //open outputfile
+            ofstream output(fName.c_str(),ios::out);
 
-                    input >> strip >> time;
+            while(input.good()){                                                    //If well open
+                int nEvent = -1;
+                int nHits = -1;
 
-                    if(time == 0 && strip == -1){
-                        MSG_ERROR("Problem with the event :");
-                        cout << nEvent << endl;
-                        exit(EXIT_FAILURE);
-                    } if(h == 0){
-                        Cluster.push_back(make_pair(strip,time));
-                        if(h == nHits-1)
-                            AddCluster2List(Cluster,ClusterList);
-                    } else {
-                        if(Cluster.size() > 0){
-                            if(abs(strip - Cluster.back().first) == 1 && abs(time - Cluster.back().second) < 100){
-                                Cluster.push_back(make_pair(strip,time));
-                                if(h == nHits-1)
-                                    AddCluster2List(Cluster,ClusterList);
-                            } else if(strip == Cluster.back().first && Cluster.size() > 1){
-                                vector< pair<int,int> > tempCluster;
-                                tempCluster.clear();
-                                tempCluster.push_back(make_pair(strip,time));
-                                AddCluster2List(tempCluster,ClusterList);
-                                if(h == nHits-1)
-                                    AddCluster2List(Cluster,ClusterList);
-                            } else {
-                                AddCluster2List(Cluster,ClusterList);
-                                Cluster.push_back(make_pair(strip,time));
-                                if(h == nHits-1)
-                                    AddCluster2List(Cluster,ClusterList);
-                            }
-                        } else {
-                            Cluster.push_back(make_pair(strip,time));
-                            if(h == nHits-1)
-                                AddCluster2List(Cluster,ClusterList);
+                input >> nEvent >> nHits;                                           //Read event label and
+                                                                                    //number of hits in event
+                vector< vector< pair<int,int> > > ClusterList;
+                ClusterList.clear();
+
+                if(nEvent == -1 && nHits == -1){                                    //If they are still at their
+                    MSG_INFO("End of the file.\n");                                 //initial values, this is the
+                    break;                                                          //end of the data file.
+                } else if(nHits > 0){                                               //Else,
+                    vector< pair<int,int> > TimeCluster, StripCluster;
+                    TimeCluster.clear();
+                    StripCluster.clear();
+
+                    for(int h = 0; h < nHits; h++){                                 //loop on the hits
+                        int strip = -1;                                             //to make clusters.
+                        int time = -1;
+
+                        input >> strip >> time;                                     //Read each channel/time pairs
+
+                        if(time == -1 && strip == -1){                              //If there is nothing in the file
+                            MSG_ERROR("Problem with the event : ");                 //This is a problem !
+                            cout << nEvent << endl;
+                            exit(EXIT_FAILURE);
+                        } else {                                                    //Else, in the case...
+                            if(TimeCluster.size() > 0){                             //... the array isn't empty,
+                                if(IsInCluster(time,TimeCluster,"TIME")){           //check if the hit is on time
+                                    TimeCluster.push_back(make_pair(strip,time));   //and add it to the array.
+                                } else {                                            //If not, sort the array and
+                                    GroupStrips(TimeCluster,StripCluster,ClusterList);//make strip clusters from it.
+                                    TimeCluster.clear();                            //Clear the array and fill
+                                    TimeCluster.push_back(make_pair(strip,time));   //it with this hit.
+                                }
+                            } else {                                                //... the array is empty,
+                                TimeCluster.push_back(make_pair(strip,time));       //initialise it with this
+                            }                                                       //hit.
                         }
                     }
+                    GroupStrips(TimeCluster,StripCluster,ClusterList);              //Sort the very last time array
+                    TimeCluster.clear();                                            //make clusters and clear.
                 }
-            }
-            PrintCluster(nEvent,ClusterList,output);
+                PrintClusters(nEvent,ClusterList,output);                           //Finally print the list of
+            }                                                                       //cluster into the output.
+            output.close();
+        } else {
+            MSG_ERROR("Couldn't open data file to clusterize.");
+            exit(EXIT_FAILURE);
         }
-        output.close();
-    } else {
-        MSG_ERROR("Couldn't open data file to clusterize.");
-        exit(EXIT_FAILURE);
-    }
-    input.close();
+        input.close();
 }

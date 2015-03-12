@@ -14,7 +14,8 @@ using namespace std;
 //TDCs give 2 informations :
 //  - Channel (that leads to the strip)
 //  - Time stamp
-//This function allows to sort data pairs by increasing strip number.
+//This function allows to sort data pairs by increasing strip number ortime stamp
+//depending on an option.
 
 //To sort the data, a quicksort algorithm is used. It consists in 3 steps :
 
@@ -35,7 +36,7 @@ int RandomPivot(int first,int last){        //Return a random element index in r
 
 //*************************************************************************************
 
-int Partition(vector< pair<int,int> >& A, int f, int l){
+int Partition(vector< pair<int,int> >& A, int f, int l, string option){
     pair<int,int> tPair;                    //Temporary pair to help swaping elements.
 
     int p = RandomPivot(f,l);               //Pick a random element as pivot and then
@@ -49,8 +50,9 @@ int Partition(vector< pair<int,int> >& A, int f, int l){
                                             //you increment j.
                                             //At the end, j corresponds to the final of
                                             //the pivot.
-    for(int i=f; i<l; i++){
-        if(A[i].first < A[l].first){        //If element i is smaller than the pivot :
+
+    for(int i=f; i<l; i++){                 //If element i is smaller than the pivot :
+        if((option == "STRIP" && A[i].first < A[l].first) || (option == "TIME" && A[i].second < A[l].second)){
             tPair = A[i];                   //swap the element i with the element j
             A[i] = A[j];                    //which is the last element that was greater
             A[j] = tPair;                   //than the pivot.
@@ -66,15 +68,15 @@ int Partition(vector< pair<int,int> >& A, int f, int l){
 
 //*************************************************************************************
 
-void SortEvent(vector< pair<int,int> >& A, int f, int l){
+void SortEvent(vector< pair<int,int> >& A, int f, int l, string option){
     if(f < l){
-        int pivot = Partition(A,f,l);       //Partition your array and get the pivot.
+        int pivot = Partition(A,f,l,option);//Partition your array and get the pivot.
 
         if(A.size() > 2){
             if(pivot != f)
-                SortEvent(A,f,pivot-1);     //Partition the lower sub-array.
+                SortEvent(A,f,pivot-1,option);//Partition the lower sub-array.
             if(pivot != l)
-                SortEvent(A,pivot+1,l);     //Partition the greater sub-array.
+                SortEvent(A,pivot+1,l,option);//Partition the greater sub-array.
         }
     } else if (f > l){
         MSG_ERROR("Problem with the indexes : first index f > last index l\n");
@@ -141,8 +143,8 @@ void SortData(string fName){
                     Data.push_back(make_pair(strip,time));
                 }
 
-                if(Data.size() > 0)                     //Sort the array
-                    SortEvent(Data,0,Data.size()-1);
+                if(Data.size() > 0)                     //Sort the array per time stamp.
+                    SortEvent(Data,0,Data.size()-1,"TIME");
                                                         //Print the sorted data
                 sortedFile << nEvent << " " << Data.size() << endl;
                 for(int h = 0; h < Data.size(); h++)

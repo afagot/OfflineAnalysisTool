@@ -15,8 +15,10 @@ int main(){
     //of a run in one go.
     //Then the RAW data files are sorted by strip position and neighbor strips are grouped
     //in clusters. The goal is to make a comparison in between the 3 analysis.
-    string fName = "HVEffTest_RE2-2_Cosmics_NewPreamp_55mV_9100V_run20150306202841.dat";
+    string fName = "HVEffTest_RE2-2-Top_Cosmics_NewPreamp_55mV_9300V_run20150309221348.dat";
     SortData(fName);
 
+    fName = "SORTED_" + fName;
+    ClustrizeData(fName);
     return 0;
 }

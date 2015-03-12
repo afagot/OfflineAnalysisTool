@@ -19,7 +19,9 @@
 using namespace std;
 
 void AddCluster2List(vector< pair<int,int> >& Cluster, vector < vector< pair<int,int> > >& ClusterList);
-void PrintCluster(int Event, vector< vector< pair<int,int> > >& ClusterList, ostream& output);
-void ClustrizeData(string fName);
+void PrintClusters(int Event, vector< vector< pair<int,int> > >& ClusterList, ostream& output);
+bool IsInCluster(int hit, vector< pair<int,int> > cluster, string option);
+void GroupStrips(vector< pair<int,int> >& tCluster, vector< pair<int,int> >& sCluster, vector< vector< pair<int,int> > >& cList);
+void Analyse(string fName);
 
 #endif // CLUSTERS_H

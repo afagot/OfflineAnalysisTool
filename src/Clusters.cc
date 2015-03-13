@@ -100,7 +100,8 @@ void GroupStrips(vector< pair<int,int> >& tCluster, vector< pair<int,int> >& sCl
 void Analyse(string fName){
     ifstream input(fName.c_str(),ios::in);                                          //Open inputfile (data)
 
-        if(input){                                                                  //If well open,
+        if(input){
+            MSG_INFO("Open the file and start clusterization.\n");                  //If well open,
             fName = "CLUSTERIZED_" + fName;                                         //open outputfile
             ofstream output(fName.c_str(),ios::out);
 
@@ -114,7 +115,7 @@ void Analyse(string fName){
                 ClusterList.clear();
 
                 if(nEvent == -1 && nHits == -1){                                    //If they are still at their
-                    MSG_INFO("End of the file.\n");                                 //initial values, this is the
+                    MSG_INFO("End of clusterization.\n");                           //initial values, this is the
                     break;                                                          //end of the data file.
                 } else if(nHits > 0){                                               //Else,
                     vector< pair<int,int> > TimeCluster, StripCluster;

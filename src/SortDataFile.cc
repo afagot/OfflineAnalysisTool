@@ -132,7 +132,7 @@ void SortData(string fName){
             rawFile >> nEvent >> nHits;                 //From data file, read headerline
 
             if(nEvent == -1 && nHits == -1){            //If nothing is read, this is the
-                MSG_INFO("End of the file.\n");           //end.
+                MSG_INFO("End of sorting.\n");          //end.
                 break;
             } else {
                 for(int h=0; h<nHits; h++){             //else loop on every hit.

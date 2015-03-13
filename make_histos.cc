@@ -24,84 +24,80 @@
 
 #include "include/RPCGeometry.h"
 
-#define ActiveAreaB2 (3894.18/2.)
-
 using namespace std;
 
 void make_histos(string fName){
-    if ( fName.substr(fName.find_last_of(".")) == ".txt" )
+    if ( fName.substr(fName.find_last_of(".")) == ".dat" )
         fName = fName.erase(fName.find_last_of("."));
-
-    string Chamber = fName.substr(0,13);
-    string HV = fName.substr(17,4);
-//    string Thr = fName.substr(18,3);
-//    string Partition = fName.substr(32,2);
-    //Part to comment if not using files in Gamma_off/Run210714
-    string Partition = fName.substr(33,2);
-    int offset = 0;
-    if(Partition == "A1") offset = 1*16;
-    if(Partition == "A2") offset = 2*16;
-    if(Partition == "B1") offset = 3*16;
-    if(Partition == "B2") offset = 4*16;
-    if(Partition == "C1") offset = 5*16;
-    if(Partition == "C2") offset = 6*16;
-    //***
 
     string ResultName = "Results_" + Chamber + ".csv";
 
-    ofstream CosmicFile(ResultName.c_str(),ios::app);
-    CosmicFile << "Partition\t" << Partition << '\n';
-    CosmicFile << "HV\t" << HV << '\n';
-//    CosmicFile << "Threshold\t" << Thr << '\n';
+    ofstream ResultFile(ResultName.c_str(),ios::app);
 
     string fNameROOT = "ROOT_" + fName + ".root";
-    TFile CosmicsROOT(fNameROOT.c_str(),"RECREATE");
+    TFile ResultROOT(fNameROOT.c_str(),"RECREATE");
 
     //********************************************************************
 
-    string fNameSorted = "STRIPSORTED_" + fName + ".txt";
+    string fNameSorted = "CLUSTERIZED_SORTED_" + fName + ".dat";
     ifstream SortedFile(fNameSorted.c_str(),ios::in);
 
     if(SortedFile){
-        TH1S* StripProfile = new TH1S("StripProfile","Strip profile",16,offset-15.5,offset+.5);
+        TH1S* StripProfile = new TH1S("StripProfile","Strip profile",128,-0.5,127.5);
         StripProfile->SetXTitle("Strip");
         StripProfile->SetYTitle("# of events");
 
-        TH1S* TimeProfile = new TH1S("TimeProfile","Time profile",26,0,26000);
-        TimeProfile->SetXTitle("Time");
+        TH1S* TimeProfile = new TH1S("TimeProfile","Arrival time profile",51250,0,512500);
+        TimeProfile->SetXTitle("Time [100ps]");
         TimeProfile->SetYTitle("# of events");
 
-        TH2S* TDCProfile = new TH2S("TDCProfile","TDC map",16,offset-15.5,offset+.5,26,0,26000);
+        TH2S* TDCProfile = new TH2S("TDCProfile","TDC map",128,-0.5,127.5,51250,0,512500);
         TDCProfile->SetXTitle("Strip");
-        TDCProfile->SetYTitle("Time");
+        TDCProfile->SetYTitle("Time [100ps]");
 
-        TH1S* HitMultiplicity = new TH1S("HitMultiplicity","Multiplicity",17,-0.5,16.5);
+        TH1S* HitMultiplicity = new TH1S("HitMultiplicity","Hit multiplicity",31,-0.5,30.5);
         HitMultiplicity->SetXTitle("Multiplicity");
         HitMultiplicity->SetYTitle("# of events");
 
-        TH1S* EffStep1 = new TH1S("EffStep1","Efficiency of level 1",2,-0.5,1.5);
-        EffStep1->SetXTitle("Hit (No/Yes)");
-        EffStep1->SetYTitle("# of events");
+        TH1S* ClusterMultiplicity = new TH1S("ClusterMultiplicity","Cluster multiplicity",21,-0.5,20.5);
+        ClusterMultiplicity->SetXTitle("Multiplicity");
+        ClusterMultiplicity->SetYTitle("# of events");
+
+        TH1S* ClusterSize = new TH1S("ClusterSize","Cluster size",16,0.5,16.5);
+        ClusterSize->SetXTitle("Multiplicity");
+        ClusterSize->SetYTitle("# of events");
+
+        TH1S* ClusterPosition = new TH1S("ClusterPosition","Cluster position profile",128,-0.5,127.5);
+        ClusterPosition->SetXTitle("Strip");
+        ClusterPosition->SetYTitle("# of events");
+
+        TH1S* ClusterTime = new TH1S("ClusterTime","Cluster arrival time profile",51250,0,512500);
+        ClusterTime->SetXTitle("Time [100ps]");
+        ClusterTime->SetYTitle("# of events");
+
+        TH2S* ClusterProfile = new TH2S("ClusterProfile","Cluster map",128,-0.5,127.5,51250,0,512500);
+        ClusterProfile->SetXTitle("Strip");
+        ClusterProfile->SetYTitle("Time [100ps]");
 
         while(SortedFile.good()){
             int Event = 0;
-            int Multiplicity = -1;
+            int cMultiplicity = -1;
 
-            SortedFile >> Event >> Multiplicity;
+            SortedFile >> Event >> cMultiplicity;
 
             vector< pair<int,int> > HitList;
             HitList.clear();
 
-            if(Event == 0 && Multiplicity == -1){
+            if(Event == 0 && cMultiplicity == -1){
                 cout << "End of file " << fNameSorted << endl;
                 break;
-            } else if(Multiplicity == 0){
+            } else if(cMultiplicity == 0){
                 HitMultiplicity->Fill(0);
-                EffStep1->Fill(0);
+                Efficiency->Fill(0);
             } else {
-                HitMultiplicity->Fill(Multiplicity);
-                EffStep1->Fill(1);
-                for(int h = 0; h < Multiplicity; h++){
+                HitMultiplicity->Fill(cMultiplicity);
+                Efficiency->Fill(1);
+                for(int h = 0; h < cMultiplicity; h++){
                     int strip = -1;
                     int time = -1;
 
@@ -115,20 +111,99 @@ void make_histos(string fName){
                 }
             }
         }
-        float e = EffStep1->GetMean();              //Efficiency after time cut
-        float N = EffStep1->GetEntries();           //Number of events (should be the same as the previous one)
+        float e = Efficiency->GetMean();              //Efficiency after time cut
+        float N = Efficiency->GetEntries();           //Number of events (should be the same as the previous one)
         float estat = sqrt(e*(1-e)/N);              //Statistical error on efficiency after time cut
 
-        CosmicFile << "Efficiency_1\t" << e << '\t' << estat << '\n';
-        CosmicFile << "Hit_Multiplicity\t" << HitMultiplicity->GetMean() << '\t' << 2*HitMultiplicity->GetRMS()/sqrt(N) << '\n';
+        ResultFile << "Efficiency_1\t" << e << '\t' << estat << '\n';
+        ResultFile << "Hit_Multiplicity\t" << HitMultiplicity->GetMean() << '\t' << 2*HitMultiplicity->GetRMS()/sqrt(N) << '\n';
 
         StripProfile->Write();
         TimeProfile->Write();
         TDCProfile->Write();
         HitMultiplicity->Write();
-        EffStep1->Write();
+        Efficiency->Write();
     }
     SortedFile.close();
+
+    while(FinalFile.good()){
+        int Event = 0;
+        int Multiplicity = -1;
+
+        FinalFile >> Event >> Multiplicity;
+
+        if(Event == 0 && Multiplicity == -1){
+            cout << "End of file " << fNameFinal << endl;
+            break;
+        } else if(Multiplicity == 0){
+            FinalClusterMultiplicity->Fill(0);
+            EffStep3->Fill(0);
+        } else {
+            FinalClusterMultiplicity->Fill(Multiplicity);
+            if(Multiplicity == 1) EffStep3->Fill(1);
+            else EffStep3->Fill(0);
+
+            float Position[16] = {0};
+            float Time[16] = {0};
+
+            for(int c = 0; c < Multiplicity; c++){
+                int cluster = -1;
+                int size = -1;
+                FinalFile >> cluster >> size;
+
+                FinalClusterSize->Fill(size);
+
+                for(int h = 0; h < size; h++){
+                    int strip = -1;
+                    int time = -1;
+                    FinalFile >> strip >> time;
+
+                    Position[c] += offset-strip;
+                    Time[c] += time/10.;
+                }
+                Position[c] /= size;
+                FinalClusterPosition->Fill(Position[c]);
+                if(Multiplicity==1) Final1ClusterPosition->Fill(Position[c]);
+                else if(Multiplicity==2) Final2ClusterPosition->Fill(Position[c]);
+                else FinalXClusterPosition->Fill(Position[c]);
+                Time[c] /= size;
+            }
+            if(Multiplicity == 2){
+                int a = 0;
+                int b = 0;
+                if(Time[0] > 1330 && Time[0] < 1375) b =1;
+                else a = 1;
+                Final2ClusterDistance->Fill(Position[b]-Position[a]);
+                Final2ClusterTimeDiff->Fill(Time[b]-Time[a]);
+                Final2ClusterCarac->Fill(Position[b]-Position[a],Time[b]-Time[a]);
+            }
+        }
+    }
+    float N = FinalClusterMultiplicity->GetEntries();
+
+    float cMultiplicity = FinalClusterMultiplicity->GetMean();
+    float ecMultiplicity = 2*FinalClusterMultiplicity->GetRMS()/sqrt(N);
+    float cSize = FinalClusterSize->GetMean();
+    float ecSize = 2*FinalClusterSize->GetRMS()/sqrt(N);
+
+    float gammaRate = (cMultiplicity/IntTime/ActiveAreaB2)/1000;
+    float egammaRate = 0.;
+    if(gammaRate != 0) egammaRate = gammaRate*(ecMultiplicity/cMultiplicity+ecSize/cSize);
+
+    ResultFile << "Gamma_rate_(KHz)\t"
+               << gammaRate << '\t'
+               << egammaRate << '\n';
+
+    float e = EffStep3->GetMean();
+    float estat = sqrt(e*(1-e)/N);
+
+    ResultFile << "Efficiency_3\t" << e << '\t' << estat << '\n';
+    ResultFile << "Cluster_multiplicity_3\t"
+               << cMultiplicity << '\t'
+               << ecMultiplicity << '\n';
+    ResultFile << "Cluster_size_3\t"
+               << cSize << '\t'
+               << ecSize << '\n';
 
     //********************************************************************
 
@@ -184,11 +259,11 @@ void make_histos(string fName){
         float N = EffStep2A->GetEntries();
         float estat = sqrt(e*(1-e)/N);
 
-        CosmicFile << "Efficiency_2A\t" << e << '\t' << estat << '\n';
-        CosmicFile << "Cluster_multiplicity_2A\t"
+        ResultFile << "Efficiency_2A\t" << e << '\t' << estat << '\n';
+        ResultFile << "Cluster_multiplicity_2A\t"
                    << StripClusterMultiplicity->GetMean() << '\t'
                    << 2*StripClusterMultiplicity->GetRMS()/sqrt(N) << '\n';
-        CosmicFile << "Cluster_size_2A\t"
+        ResultFile << "Cluster_size_2A\t"
                    << StripClusterSize->GetMean() << '\t'
                    << 2*StripClusterSize->GetRMS()/sqrt(N) << '\n';
 
@@ -252,11 +327,11 @@ void make_histos(string fName){
         float N = EffStep2B->GetEntries();
         float estat = sqrt(e*(1-e)/N);
 
-        CosmicFile << "Efficiency_2B\t" << e << '\t' << estat << '\n';
-        CosmicFile << "Cluster_multiplicity_2B\t"
+        ResultFile << "Efficiency_2B\t" << e << '\t' << estat << '\n';
+        ResultFile << "Cluster_multiplicity_2B\t"
                    << TimeClusterMultiplicity->GetMean() << '\t'
                    << 2*TimeClusterMultiplicity->GetRMS()/sqrt(N) << '\n';
-        CosmicFile << "Cluster_size_2B\t"
+        ResultFile << "Cluster_size_2B\t"
                    << TimeClusterSize->GetMean() << '\t'
                    << 2*TimeClusterSize->GetRMS()/sqrt(N) << '\n';
 
@@ -362,18 +437,18 @@ void make_histos(string fName){
         float egammaRate = 0.;
         if(gammaRate != 0) egammaRate = gammaRate*(ecMultiplicity/cMultiplicity+ecSize/cSize);
 
-        CosmicFile << "Gamma_rate_(KHz)\t"
+        ResultFile << "Gamma_rate_(KHz)\t"
                    << gammaRate << '\t'
                    << egammaRate << '\n';
 
         float e = EffStep3->GetMean();
         float estat = sqrt(e*(1-e)/N);
 
-        CosmicFile << "Efficiency_3\t" << e << '\t' << estat << '\n';
-        CosmicFile << "Cluster_multiplicity_3\t"
+        ResultFile << "Efficiency_3\t" << e << '\t' << estat << '\n';
+        ResultFile << "Cluster_multiplicity_3\t"
                    << cMultiplicity << '\t'
                    << ecMultiplicity << '\n';
-        CosmicFile << "Cluster_size_3\t"
+        ResultFile << "Cluster_size_3\t"
                    << cSize << '\t'
                    << ecSize << '\n';
 
@@ -390,8 +465,8 @@ void make_histos(string fName){
     }
     FinalFile.close();
 
-    CosmicFile.close();
+    ResultFile.close();
 
-    CosmicsROOT.Close();
+    ResultROOT.Close();
     cout << "Creation of file " << fNameROOT << endl;
 }

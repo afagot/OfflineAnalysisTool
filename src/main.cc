@@ -4,21 +4,26 @@
 // *   2/3/2015
 // *********************************************************************
 
+
+#include <sstream>
 #include "../include/SortDataFile.h"
 #include "../include/Clusters.h"
 
 using namespace std;
 
-int main(){
-    //Using a shell script, replace "XXXX" by the name of the file you want to analyse.
-    //The advantage is be able to use a "for" loop to perform the analysis on every file
-    //of a run in one go.
-    //Then the RAW data files are sorted by strip position and neighbor strips are grouped
-    //in clusters. The goal is to make a comparison in between the 3 analysis.
-    string fName = "HVEffTest_Ghent-gRPC_Double_Cosmics_NewPreamp_80mV_5200V_run20150313111850.dat";
-    SortData(fName);
+int main(int argc, char* argv[]){
+    if(argc != 2){
+        cout<<"USAGE : "<< argv[0] <<" <filename>\n";
+    } else {
+        stringstream converter;
+        converter << argv[1];
+        string fName;
+        converter >> fName;
 
-    fName = "SORTED_" + fName;
-    Analyse(fName);
-    return 0;
+        SortData(fName);
+
+        fName = "SORTED_" + fName;
+        Analyse(fName);
+        return 0;
+    }
 }

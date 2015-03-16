@@ -175,7 +175,7 @@ void make_histos(string fName){
         ClusterProfile->Write();
         Efficiency->Write();
     } else {
-        MSG_ERROR("Couldn't open the data file.");
+        MSG_ERROR("Couldn't open the data file.\n");
         exit(EXIT_FAILURE);
     }
 

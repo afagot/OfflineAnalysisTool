@@ -36,7 +36,7 @@ int RandomPivot(int first,int last){        //Return a random element index in r
 
 //*************************************************************************************
 
-int Partition(vector< pair<int,int> >& A, int f, int l, string option){
+int Partition(vector< pair<int,float> >& A, int f, int l, string option){
     pair<int,int> tPair;                    //Temporary pair to help swaping elements.
 
     int p = RandomPivot(f,l);               //Pick a random element as pivot and then
@@ -68,7 +68,7 @@ int Partition(vector< pair<int,int> >& A, int f, int l, string option){
 
 //*************************************************************************************
 
-void SortEvent(vector< pair<int,int> >& A, int f, int l, string option){
+void SortEvent(vector< pair<int,float> >& A, int f, int l, string option){
     if(f < l){
         int pivot = Partition(A,f,l,option);//Partition your array and get the pivot.
 
@@ -119,7 +119,7 @@ void SortData(string fName){
 
     if(rawFile){
         MSG_INFO("Open the file and start sorting.\n");
-        vector < pair<int,int> > Data;                  //Array to contain hit list for
+        vector < pair<int,float> > Data;                  //Array to contain hit list for
         Data.clear();                                   //each event.
 
         fName = "SORTED_" + fName;
@@ -137,7 +137,7 @@ void SortData(string fName){
             } else {
                 for(int h=0; h<nHits; h++){             //else loop on every hit.
                     int strip = -1;
-                    int time = -1;
+                    float time = -1;
 
                     rawFile >> strip >> time;           //Save data pairs into the array.
                     Data.push_back(make_pair(strip,time));

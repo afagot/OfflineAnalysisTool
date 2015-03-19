@@ -14,7 +14,7 @@ using namespace std;
 //This function adds the hit array into the cluster list as new cluster and
 //clears the hit array.
 
-void AddCluster2List(vector< pair<int,int> >& Cluster, vector < vector< pair<int,int> > >& ClusterList){
+void AddCluster2List(vector< pair<int,float> >& Cluster, vector < vector< pair<int,float> > >& ClusterList){
     ClusterList.push_back(Cluster);
     Cluster.clear();
 }
@@ -42,7 +42,7 @@ void AddCluster2List(vector< pair<int,int> >& Cluster, vector < vector< pair<int
 //HitN          TimeN
 
 
-void PrintClusters(int Event, vector< vector< pair<int,int> > >& ClusterList, ostream& output){
+void PrintClusters(int Event, vector< vector< pair<int,float> > >& ClusterList, ostream& output){
     output << Event << " " << ClusterList.size() <<endl;
     for(unsigned int c = 0; c < ClusterList.size(); c++){
         output << c+1 << " " << ClusterList[c].size() << endl;
@@ -55,9 +55,9 @@ void PrintClusters(int Event, vector< vector< pair<int,int> > >& ClusterList, os
 //*****************************************************************************
 //Function that returns if the hit is part of the cluster.
 
-bool IsInCluster(int hit, vector< pair<int,int> > cluster, string option){
+bool IsInCluster(int hit, vector< pair<int,float> > cluster, string option){
     if(option == "TIME"){                                                           //Time condition for cluters :
-        return hit-cluster.front().second < 100;                                    //10 ns wide (unit = 100 ps).
+        return hit-cluster.front().second < 10.0;                                   //10 ns wide (unit = 100 ps).
     } else if(option == "STRIP"){                                                   //Strip condition for clusters :
         return hit-cluster.back().first == 1;                                       //neighbor strips.
     }
@@ -67,7 +67,7 @@ bool IsInCluster(int hit, vector< pair<int,int> > cluster, string option){
 //Function that groups neighbor hits, among an an array of "on time" hits, in
 //order to make the clusters.
 
-void GroupStrips(vector< pair<int,int> >& tCluster, vector< pair<int,int> >& sCluster, vector< vector< pair<int,int> > >& cList){
+void GroupStrips(vector< pair<int,float> >& tCluster, vector< pair<int,float> >& sCluster, vector< vector< pair<int,float> > >& cList){
     SortEvent(tCluster,0,tCluster.size()-1,"STRIP");                                //Sort your time array by
                                                                                     //increasing strip number.
 
@@ -111,14 +111,14 @@ void Analyse(string fName){
 
                 input >> nEvent >> nHits;                                           //Read event label and
                                                                                     //number of hits in event
-                vector< vector< pair<int,int> > > ClusterList;
+                vector< vector< pair<int,float> > > ClusterList;
                 ClusterList.clear();
 
                 if(nEvent == -1 && nHits == -1){                                    //If they are still at their
                     MSG_INFO("End of clusterization.\n");                           //initial values, this is the
                     break;                                                          //end of the data file.
                 } else if(nHits > 0){                                               //Else,
-                    vector< pair<int,int> > TimeCluster, StripCluster;
+                    vector< pair<int,float> > TimeCluster, StripCluster;
                     TimeCluster.clear();
                     StripCluster.clear();
 

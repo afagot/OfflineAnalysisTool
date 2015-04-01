@@ -22,7 +22,7 @@ CFLAGS     = -ggdb -fPIC -DLINUX -Wall -funsigned-char \
 
 all: analysis
 
-daq: 	main.o Clusters.o SortDataFile.o
+analysis: 	main.o Clusters.o SortDataFile.o
 	g++ $(CFLAGS) $(DAQ_OBJ_DIR)/main.o \
 	$(DAQ_OBJ_DIR)/Clusters.o \
 	$(DAQ_OBJ_DIR)/SortDataFile.o \

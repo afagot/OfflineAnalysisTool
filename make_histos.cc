@@ -25,13 +25,9 @@
 #include "include/RPCGeometry.h"
 #include "include/MsgSvc.h"
 
-#define TRIGGEROFFSET 50025
-#define SIGNAL_LOW  TRIGGEROFFSET-15000
-#define SIGNAL_HIGH TRIGGEROFFSET-14600
-
 using namespace std;
 
-void make_histos(string fName){
+void make_histos(string fName, int WINDOW_WIDTH, int SIGNAL_LOW, int SIGNAL_HIGH){
     ifstream SortedFile(fName.c_str(),ios::in);
 
     if ( fName.substr(fName.find_last_of(".")) == ".dat" )
@@ -52,11 +48,11 @@ void make_histos(string fName){
         StripProfile->SetXTitle("Strip");
         StripProfile->SetYTitle("# of events");
 
-        TH1I* TimeProfile = new TH1I("TimeProfile","Arrival time profile",51250,0,512500);
+        TH1I* TimeProfile = new TH1I("TimeProfile","Arrival time profile",WINDOW_WIDTH,0,10*WINDOW_WIDTH);
         TimeProfile->SetXTitle("Time [100ps]");
         TimeProfile->SetYTitle("# of events");
 
-        TH2I* TDCProfile = new TH2I("TDCProfile","TDC map",128,-0.5,127.5,51250,0,512500);
+        TH2I* TDCProfile = new TH2I("TDCProfile","TDC map",128,-0.5,127.5,WINDOW_WIDTH,0,10*WINDOW_WIDTH);
         TDCProfile->SetXTitle("Strip");
         TDCProfile->SetYTitle("Time [100ps]");
 
@@ -76,11 +72,11 @@ void make_histos(string fName){
         ClusterPosition->SetXTitle("Strip");
         ClusterPosition->SetYTitle("# of events");
 
-        TH1I* ClusterTime = new TH1I("ClusterTime","Cluster arrival time profile",51250,0,512500);
+        TH1I* ClusterTime = new TH1I("ClusterTime","Cluster arrival time profile",WINDOW_WIDTH,0,10*WINDOW_WIDTH);
         ClusterTime->SetXTitle("Time [100ps]");
         ClusterTime->SetYTitle("# of events");
 
-        TH2I* ClusterProfile = new TH2I("ClusterProfile","Cluster map",128,-0.5,127.5,51250,0,512500);
+        TH2I* ClusterProfile = new TH2I("ClusterProfile","Cluster map",128,-0.5,127.5,WINDOW_WIDTH,0,10*WINDOW_WIDTH);
         ClusterProfile->SetXTitle("Strip");
         ClusterProfile->SetYTitle("Time [100ps]");
 

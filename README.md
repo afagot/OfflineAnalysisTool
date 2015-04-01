@@ -37,12 +37,12 @@ or simply
 
 then the default values for [TriggerWindowWidth], [TimeEarliestSignals] and [TimeLatestSignals] are 50000, 35025 and 35375 but may not be accurate. [TriggerWindowWidth] correspond to the value set in the DAQ software during the data acquisition. To have a good estimation of [TimeEarliestSignals] and [TimeLatestSignals], first do :
 
-   bin/analysis  [datafile]
+    bin/analysis  [datafile]
 
 then :
 
-   root -l
-   new TBrowser
+    root -l
+    new TBrowser
 
 and look into the histogram called "TimeProfile". Zoom on the cosmics pic to get the first and last bin values. To do so, the first step is to place the mouse onto the axis at the level of the units :
 

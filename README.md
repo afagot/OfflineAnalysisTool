@@ -44,4 +44,22 @@ then :
    root -l
    new TBrowser
 
-and look into the histogram called "TimeProfile". Zoom on the cosmics pic to get the first and last bin values. To do so, 
+and look into the histogram called "TimeProfile". Zoom on the cosmics pic to get the first and last bin values. To do so, the first step is to place the mouse onto the axis at the level of the units :
+
+![Mouse on axis](/alexis/img/step1.png?raw=true "Mouse on axis")
+
+The second step consists in selecting using the left click of the mouse the range you want to zoom in. Repeat that step as many times as needed (you cannot zoom on tooo small ranges...) :
+
+![Range selection](/alexis/img/step2.png?raw=true "Range selection")
+
+Finally, read the value of the first bin and last bin on the x-axis :
+
+![Bins reading](/alexis/img/step3.png?raw=true "Bins reading")
+
+Once you have all the needed values, you can do :
+
+   bin/analysis <datafile> <TriggerWindowWidth> <TimeEarliestSignals> <TimeLatestSignals>
+
+And print the efficiency and cluster size with :
+
+   cat Results_<runNumber>.csv

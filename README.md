@@ -9,35 +9,35 @@
 
 To be able to use the offline analysis tool, it is mandatory to have previously installed **[ROOT](https://root.cern.ch/drupal/content/installing-root-source)**. ROOT can be cloned from the git HTTP repository :
 
-   git clone http://root.cern.ch/git/root.git
+    git clone http://root.cern.ch/git/root.git
 
 Then follow the intalation steps on this page : **[HERE](https://root.cern.ch/drupal/content/installing-root-source)**.
 
 To compile the offline analysis project, first, open the makefile with a text editor, for example gedit, and modify the path to DAQ_HOME_DIR :
 
-   DAQ_HOME_DIR = /path/to/your/working/directory
+    DAQ_HOME_DIR = /path/to/your/working/directory
 
 In the case of the GIF ++ computer, we have :
 
-   DAQ_HOME_DIR = /home/gifdaq/Desktop/OfflineAnalysisTool
+    DAQ_HOME_DIR = /home/gifdaq/Desktop/OfflineAnalysisTool
 
 Then, simply do :
 
-   make
+    make
 
 ##Usage
 
-There are 2 ways to use the executable file. Being in the previoulsly defined working directory and having copied a <datafile> you want to analyse into this directory, you can do :
+There are 2 ways to use the executable file. Being in the previoulsly defined working directory and having copied a  [datafile] you want to analyse into this directory, you can do :
 
-   bin/analysis <datafile> <TriggerWindowWidth> <TimeEarliestSignals> <TimeLatestSignals>
+    bin/analysis [datafile] [TriggerWindowWidth] [TimeEarliestSignals] [TimeLatestSignals]
 
 or simply
 
-   bin/analysis <datafile>
+    bin/analysis  [datafile]
 
-then the default values for <TriggerWindowWidth>, <TimeEarliestSignals> and <TimeLatestSignals> are 50000, 35025 and 35375 but may not be accurate. <TriggerWindowWidth> correspond to the value set in the DAQ software during the data acquisition. To have a good estimation of <TimeEarliestSignals> and <TimeLatestSignals>, first do :
+then the default values for [TriggerWindowWidth], [TimeEarliestSignals] and [TimeLatestSignals] are 50000, 35025 and 35375 but may not be accurate. [TriggerWindowWidth] correspond to the value set in the DAQ software during the data acquisition. To have a good estimation of [TimeEarliestSignals] and [TimeLatestSignals], first do :
 
-   bin/analysis <datafile>
+   bin/analysis  [datafile]
 
 then :
 
@@ -46,19 +46,19 @@ then :
 
 and look into the histogram called "TimeProfile". Zoom on the cosmics pic to get the first and last bin values. To do so, the first step is to place the mouse onto the axis at the level of the units :
 
-![Mouse on axis](/alexis/img/step1.png?raw=true "Mouse on axis")
+![Mouse on axis](https://raw.githubusercontent.com/afagot/OfflineAnalysisTool/alexis/img/step1.png "Mouse on axis")
 
 The second step consists in selecting using the left click of the mouse the range you want to zoom in. Repeat that step as many times as needed (you cannot zoom on tooo small ranges...) :
 
-![Range selection](/alexis/img/step2.png?raw=true "Range selection")
+![Range selection](https://raw.githubusercontent.com/afagot/OfflineAnalysisTool/alexis/img/step2.png "Range selection")
 
 Finally, read the value of the first bin and last bin on the x-axis :
 
-![Bins reading](/alexis/img/step3.png?raw=true "Bins reading")
+![Bins reading](https://raw.githubusercontent.com/afagot/OfflineAnalysisTool/alexis/img/step3.png "Bins reading")
 
 Once you have all the needed values, you can do :
 
-   bin/analysis <datafile> <TriggerWindowWidth> <TimeEarliestSignals> <TimeLatestSignals>
+   bin/analysis  [datafile] [TriggerWindowWidth] [TimeEarliestSignals] [TimeLatestSignals]
 
 And print the efficiency and cluster size with :
 

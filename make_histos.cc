@@ -52,7 +52,7 @@ void make_histos(string fName, int WINDOW_WIDTH, int SIGNAL_LOW, int SIGNAL_HIGH
         TimeProfile->SetXTitle("Time [100ps]");
         TimeProfile->SetYTitle("# of events");
 
-        TH2F* TDCProfile = new TH2F("TDCProfile","TDC map",128,-0.5,127.5,WINDOW_WIDTH,0,10*WINDOW_WIDTH);
+        TH2I* TDCProfile = new TH2F("TDCProfile","TDC map",128,-0.5,127.5,WINDOW_WIDTH,0,10*WINDOW_WIDTH);
         TDCProfile->SetXTitle("Strip");
         TDCProfile->SetYTitle("Time [100ps]");
 

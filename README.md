@@ -58,8 +58,8 @@ Finally, read the value of the first bin and last bin on the x-axis :
 
 Once you have all the needed values, you can do :
 
-   bin/analysis  [datafile] [TriggerWindowWidth] [TimeEarliestSignals] [TimeLatestSignals]
+    bin/analysis  [datafile] [TriggerWindowWidth] [TimeEarliestSignals] [TimeLatestSignals]
 
 And print the efficiency and cluster size with :
 
-   cat Results_<runNumber>.csv
+    cat Results_[runNumber].csv

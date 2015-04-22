@@ -16,9 +16,11 @@
 #include <utility>
 #include <string>
 #include <ctime>
+#include <limits>
 
 using namespace std;
 
+ifstream& GotoLine(ifstream &file, unsigned int line);
 int RandomPivot(int first,int last);
 int Partition(vector< pair<int,float> >& A, int f, int l, string option);
 void SortEvent(vector< pair<int,float> >& A, int f, int l, string option);

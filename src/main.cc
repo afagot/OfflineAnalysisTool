@@ -22,7 +22,8 @@ int main(int argc, char* argv[]){
 
         SortData(fName);
 
-        fName = "SORTED_" + fName;
+        unsigned NameInPath = fName.find_last_of("/")+1;
+        fName.insert(NameInPath,"SORTED_");
         Analyse(fName);
         return 0;
     }

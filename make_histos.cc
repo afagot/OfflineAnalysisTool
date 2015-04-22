@@ -32,13 +32,17 @@ void make_histos(string fName, int WINDOW_WIDTH, int SIGNAL_LOW, int SIGNAL_HIGH
 
     if ( fName.substr(fName.find_last_of(".")) == ".dat" )
         fName = fName.erase(fName.find_last_of("."));
+    unsigned EndOfPath = fName.find_last_of("/")+1;
 
-    string Run = fName.substr(fName.find("run"));
+    string pathName = fName.substr(0,EndOfPath);
+    string outputName = fName.substr(fName.find("SORTED_")+7);
 
-    string ResultName = "Results_" + Run + ".csv";
+    string ResultName = pathName + outputName + ".csv";
+    ResultName.insert(EndOfPath,"RESULT_");
     ofstream ResultFile(ResultName.c_str(),ios::out);
 
-    string fNameROOT = "ROOT_" + Run + ".root";
+    string fNameROOT = pathName + outputName + ".root";
+    fNameROOT.insert(EndOfPath,"ROOT_");
     TFile ResultROOT(fNameROOT.c_str(),"RECREATE");
 
     //********************************************************************
@@ -48,13 +52,13 @@ void make_histos(string fName, int WINDOW_WIDTH, int SIGNAL_LOW, int SIGNAL_HIGH
         StripProfile->SetXTitle("Strip");
         StripProfile->SetYTitle("# of events");
 
-        TH1I* TimeProfile = new TH1I("TimeProfile","Arrival time profile",WINDOW_WIDTH,0,10*WINDOW_WIDTH);
-        TimeProfile->SetXTitle("Time [100ps]");
+        TH1F* TimeProfile = new TH1F("TimeProfile","Arrival time profile",WINDOW_WIDTH,0,WINDOW_WIDTH);
+        TimeProfile->SetXTitle("Time [ns]");
         TimeProfile->SetYTitle("# of events");
 
-        TH2I* TDCProfile = new TH2F("TDCProfile","TDC map",128,-0.5,127.5,WINDOW_WIDTH,0,10*WINDOW_WIDTH);
+        TH2F* TDCProfile = new TH2F("TDCProfile","TDC map",128,-0.5,127.5,WINDOW_WIDTH,0,WINDOW_WIDTH);
         TDCProfile->SetXTitle("Strip");
-        TDCProfile->SetYTitle("Time [100ps]");
+        TDCProfile->SetYTitle("Time [ns]");
 
         TH1S* HitMultiplicity = new TH1S("HitMultiplicity","Hit multiplicity",31,-0.5,30.5);
         HitMultiplicity->SetXTitle("Multiplicity");
@@ -72,13 +76,13 @@ void make_histos(string fName, int WINDOW_WIDTH, int SIGNAL_LOW, int SIGNAL_HIGH
         ClusterPosition->SetXTitle("Strip");
         ClusterPosition->SetYTitle("# of events");
 
-        TH1I* ClusterTime = new TH1I("ClusterTime","Cluster arrival time profile",WINDOW_WIDTH,0,10*WINDOW_WIDTH);
-        ClusterTime->SetXTitle("Time [100ps]");
+        TH1F* ClusterTime = new TH1F("ClusterTime","Cluster arrival time profile",WINDOW_WIDTH,0,WINDOW_WIDTH);
+        ClusterTime->SetXTitle("Time [ns]");
         ClusterTime->SetYTitle("# of events");
 
-        TH2I* ClusterProfile = new TH2I("ClusterProfile","Cluster map",128,-0.5,127.5,WINDOW_WIDTH,0,10*WINDOW_WIDTH);
+        TH2F* ClusterProfile = new TH2F("ClusterProfile","Cluster map",128,-0.5,127.5,WINDOW_WIDTH,0,WINDOW_WIDTH);
         ClusterProfile->SetXTitle("Strip");
-        ClusterProfile->SetYTitle("Time [100ps]");
+        ClusterProfile->SetYTitle("Time [ns]");
 
         TH1S* Efficiency = new TH1S("Efficiency","Detection efficiency",2,-0.5,1.5);
         Efficiency->SetXTitle("(Not detected/Detected)");

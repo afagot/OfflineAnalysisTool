@@ -9,6 +9,14 @@
 
 using namespace std;
 
+ifstream &GotoLine(ifstream& file, unsigned int line){
+    file.seekg(ios::beg);
+    for(unsigned int i=0; i < (line-1); ++i){
+        file.ignore(numeric_limits<streamsize>::max(),'\n');
+    }
+    return file;
+}
+
 //*************************************************************************************
 
 //TDCs give 2 informations :
@@ -37,7 +45,7 @@ int RandomPivot(int first,int last){        //Return a random element index in r
 //*************************************************************************************
 
 int Partition(vector< pair<int,float> >& A, int f, int l, string option){
-    pair<int,int> tPair;                    //Temporary pair to help swaping elements.
+    pair<int,float> tPair;                    //Temporary pair to help swaping elements.
 
     int p = RandomPivot(f,l);               //Pick a random element as pivot and then
     tPair = A[p];                           //swap the pivot element with the last one.
@@ -119,10 +127,14 @@ void SortData(string fName){
 
     if(rawFile){
         MSG_INFO("Open the file and start sorting.\n");
+
+        if(rawFile.get() == '#') GotoLine(rawFile,3);
+
         vector < pair<int,float> > Data;                  //Array to contain hit list for
         Data.clear();                                   //each event.
 
-        fName = "SORTED_" + fName;
+        unsigned NameInPath = fName.find_last_of("/")+1;
+        fName.insert(NameInPath,"SORTED_");
         ofstream sortedFile(fName.c_str(), ios::out);   //Open output file in write mode.
 
         while(rawFile.good()){
@@ -147,8 +159,9 @@ void SortData(string fName){
                     SortEvent(Data,0,Data.size()-1,"TIME");
                                                         //Print the sorted data
                 sortedFile << nEvent << " " << Data.size() << endl;
-                for(int h = 0; h < Data.size(); h++)
+                for(unsigned int h = 0; h < Data.size(); h++){
                     sortedFile << Data[h].first << " " << Data[h].second << endl;
+                }
                 Data.clear();
             }
         }

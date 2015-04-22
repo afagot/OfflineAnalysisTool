@@ -73,7 +73,7 @@ void GroupStrips(vector< pair<int,float> >& tCluster, vector< pair<int,float> >&
 
     for(int h = 0; h < tCluster.size(); h++){                                       //Loop on the time hits.
         int tStrip = tCluster[h].first;
-        int tTime = tCluster[h].second;
+        float tTime = tCluster[h].second;
                                                                                     //If the strip array isn't
         if(sCluster.size() > 0){                                                    //empty, check if the hit
             if(IsInCluster(tStrip,sCluster,"STRIP")){                               //is adjacent to the last
@@ -102,7 +102,8 @@ void Analyse(string fName){
 
         if(input){
             MSG_INFO("Open the file and start clusterization.\n");                  //If well open,
-            fName = "CLUSTERIZED_" + fName;                                         //open outputfile
+            unsigned NameInPath = fName.find_last_of("/")+1;                        //open outputfile
+            fName.insert(NameInPath,"CLUSTERIZED_");
             ofstream output(fName.c_str(),ios::out);
 
             while(input.good()){                                                    //If well open
@@ -124,7 +125,7 @@ void Analyse(string fName){
 
                     for(int h = 0; h < nHits; h++){                                 //loop on the hits
                         int strip = -1;                                             //to make clusters.
-                        int time = -1;
+                        float time = -1;
 
                         input >> strip >> time;                                     //Read each channel/time pairs
 
@@ -153,7 +154,7 @@ void Analyse(string fName){
             }                                                                       //cluster into the output.
             output.close();
         } else {
-            MSG_ERROR("Couldn't open data file to clusterize.");
+            MSG_ERROR("Couldn't open data file to clusterize.\n");
             exit(EXIT_FAILURE);
         }
         input.close();

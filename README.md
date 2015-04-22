@@ -29,15 +29,15 @@ Then, simply do :
 
 There are 2 ways to use the executable file. Being in the previoulsly defined working directory, you can do :
 
-    ./offlineanalysis.sh [datafile] [TriggerWindowWidth] [TimeEarliestSignals] [TimeLatestSignals]
+    ./offlineanalysis.sh [/path/to/datafile] [TriggerWindowWidth] [TimeEarliestSignals] [TimeLatestSignals]
 
 or simply
 
-    ./offlineanalysis.sh  [datafile]
+    ./offlineanalysis.sh  [/path/to/datafile]
 
 then the default values for [TriggerWindowWidth], [TimeEarliestSignals] and [TimeLatestSignals] are 50000, 35025 and 35375 but may not be accurate. [TriggerWindowWidth] correspond to the value set in the DAQ software during the data acquisition. To have a good estimation of [TimeEarliestSignals] and [TimeLatestSignals], first do :
 
-    ./offlineanalysis.sh  [datafile]
+    ./offlineanalysis.sh  [/path/to/datafile]
 
 then :
 
@@ -58,8 +58,8 @@ Finally, read the value of the first bin and last bin on the x-axis :
 
 Once you have all the needed values, you can do :
 
-    ./offlineanalysis.sh  [datafile] [TriggerWindowWidth] [TimeEarliestSignals] [TimeLatestSignals]
+    ./offlineanalysis.sh  [/path/to/datafile] [TriggerWindowWidth] [TimeEarliestSignals] [TimeLatestSignals]
 
-And print the efficiency and cluster size with :
+And, in your datafile directory, print the efficiency and cluster size with :
 
-    cat Results_[runNumber].csv
+    cat RESULT_[datafile].csv

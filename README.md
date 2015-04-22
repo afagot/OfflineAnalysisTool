@@ -27,7 +27,7 @@ Then, simply do :
 
 ##Usage
 
-There are 2 ways to use the executable file. Being in the previoulsly defined working directory and having copied a  [datafile] you want to analyse into this directory, you can do :
+There are 2 ways to use the executable file. Being in the previoulsly defined working directory, you can do :
 
     ./offlineanalysis.sh [datafile] [TriggerWindowWidth] [TimeEarliestSignals] [TimeLatestSignals]
 

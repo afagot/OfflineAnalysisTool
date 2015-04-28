@@ -129,6 +129,7 @@ void SortData(string fName){
         MSG_INFO("Open the file and start sorting.\n");
 
         if(rawFile.get() == '#') GotoLine(rawFile,3);
+        rawFile.seekg(ios::beg);
 
         vector < pair<int,float> > Data;                  //Array to contain hit list for
         Data.clear();                                   //each event.

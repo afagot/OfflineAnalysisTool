@@ -5,7 +5,7 @@
 # 02/03/2015  Created by A.Fagot
 
 
-DAQ_HOME_DIR = /home/gifdaq/Desktop/OfflineAnalysisTool
+DAQ_HOME_DIR = .
 DAQ_BIN_DIR = $(DAQ_HOME_DIR)/bin
 DAQ_INC_DIR = $(DAQ_HOME_DIR)/include
 DAQ_SRC_DIR = $(DAQ_HOME_DIR)/src

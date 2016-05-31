@@ -48,7 +48,7 @@ void make_histos(string fName, int WINDOW_WIDTH, int SIGNAL_LOW, int SIGNAL_HIGH
     //********************************************************************
 
     if(SortedFile){
-        TH1S* StripProfile = new TH1S("StripProfile","Strip profile",128,-0.5,127.5);
+        TH1S* StripProfile = new TH1S("StripProfile","Strip profile",16,15.5,31.5);
         StripProfile->SetXTitle("Strip");
         StripProfile->SetYTitle("# of events");
 
@@ -56,7 +56,7 @@ void make_histos(string fName, int WINDOW_WIDTH, int SIGNAL_LOW, int SIGNAL_HIGH
         TimeProfile->SetXTitle("Time [ns]");
         TimeProfile->SetYTitle("# of events");
 
-        TH2F* TDCProfile = new TH2F("TDCProfile","TDC map",128,-0.5,127.5,WINDOW_WIDTH,0,WINDOW_WIDTH);
+        TH2F* TDCProfile = new TH2F("TDCProfile","TDC map",16,15.5,31.5,WINDOW_WIDTH,0,WINDOW_WIDTH);
         TDCProfile->SetXTitle("Strip");
         TDCProfile->SetYTitle("Time [ns]");
 
@@ -72,7 +72,7 @@ void make_histos(string fName, int WINDOW_WIDTH, int SIGNAL_LOW, int SIGNAL_HIGH
         ClusterSize->SetXTitle("Multiplicity");
         ClusterSize->SetYTitle("# of events");
 
-        TH1S* ClusterPosition = new TH1S("ClusterPosition","Cluster position profile",128,-0.5,127.5);
+        TH1S* ClusterPosition = new TH1S("ClusterPosition","Cluster position profile",31,15.75,31.25);
         ClusterPosition->SetXTitle("Strip");
         ClusterPosition->SetYTitle("# of events");
 
@@ -80,7 +80,7 @@ void make_histos(string fName, int WINDOW_WIDTH, int SIGNAL_LOW, int SIGNAL_HIGH
         ClusterTime->SetXTitle("Time [ns]");
         ClusterTime->SetYTitle("# of events");
 
-        TH2F* ClusterProfile = new TH2F("ClusterProfile","Cluster map",128,-0.5,127.5,WINDOW_WIDTH,0,WINDOW_WIDTH);
+        TH2F* ClusterProfile = new TH2F("ClusterProfile","Cluster map",31,15.75,31.25,WINDOW_WIDTH,0,WINDOW_WIDTH);
         ClusterProfile->SetXTitle("Strip");
         ClusterProfile->SetYTitle("Time [ns]");
 

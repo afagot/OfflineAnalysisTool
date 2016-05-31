@@ -131,7 +131,7 @@ void SortData(string fName){
         if(rawFile.get() == '#') GotoLine(rawFile,3);
         else rawFile.seekg(ios::beg);
 
-        vector < pair<int,float> > Data;                  //Array to contain hit list for
+        vector < pair<int,float> > Data;                //Array to contain hit list for
         Data.clear();                                   //each event.
 
         unsigned NameInPath = fName.find_last_of("/")+1;
@@ -152,14 +152,16 @@ void SortData(string fName){
                     int strip = -1;
                     float time = -1;
 
-                    rawFile >> strip >> time;           //Save data pairs into the array.
-                    Data.push_back(make_pair(strip,time));
+                        rawFile >> strip >> time;           //Save data pairs into the array.
+                    if(strip >= 16)
+                        Data.push_back(make_pair(strip,time));
                 }
 
                 if(Data.size() > 0)                     //Sort the array per time stamp.
                     SortEvent(Data,0,Data.size()-1,"TIME");
                                                         //Print the sorted data
                 sortedFile << nEvent << " " << Data.size() << endl;
+
                 for(unsigned int h = 0; h < Data.size(); h++){
                     sortedFile << Data[h].first << " " << Data[h].second << endl;
                 }

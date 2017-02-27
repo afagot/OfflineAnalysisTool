@@ -1,6 +1,6 @@
 #!/bin/bash
 
-cp ../GIF_DAQ/datarun/*.dat .
+cp $1/*.dat .
 
 for dFile in *.dat
 do
@@ -10,9 +10,13 @@ done
 
 for dFile in CLUSTERIZED*
 do
-	root -l -q 'make_histos.cc+("'$dFile'")';
+	root -l -q 'make_histos.cc+("'$dFile'",'${2-1000}','${3-460}','${4-495}')';
 done
 
-rm *.dat
-mv *.csv results/csv/.
-mv *.root results/root/.
+mkdir -p $1/DAT/
+mkdir -p $1/CSV/
+mkdir -p $1/ROOT/
+
+mv *.dat $1/DAT/.
+mv RESULT*.csv $1/CSV/.
+mv ROOT*.root $1/ROOT/.

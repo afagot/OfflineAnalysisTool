@@ -48,15 +48,15 @@ void make_histos(string fName, int WINDOW_WIDTH, int SIGNAL_LOW, int SIGNAL_HIGH
     //********************************************************************
 
     if(SortedFile){
-        TH1S* StripProfile = new TH1S("StripProfile","Strip profile",16,15.5,31.5);
+        TH1S* StripProfile = new TH1S("StripProfile","Strip profile",16,-0.5,15.5);
         StripProfile->SetXTitle("Strip");
         StripProfile->SetYTitle("# of events");
 
-        TH1F* TimeProfile = new TH1F("TimeProfile","Arrival time profile",WINDOW_WIDTH,0,WINDOW_WIDTH);
+        TH1F* TimeProfile = new TH1F("TimeProfile","Arrival time profile",WINDOW_WIDTH/10,0,WINDOW_WIDTH);
         TimeProfile->SetXTitle("Time [ns]");
         TimeProfile->SetYTitle("# of events");
 
-        TH2F* TDCProfile = new TH2F("TDCProfile","TDC map",16,15.5,31.5,WINDOW_WIDTH,0,WINDOW_WIDTH);
+        TH2F* TDCProfile = new TH2F("TDCProfile","TDC map",16,-0.5,15.5,WINDOW_WIDTH/10,0,WINDOW_WIDTH);
         TDCProfile->SetXTitle("Strip");
         TDCProfile->SetYTitle("Time [ns]");
 
@@ -68,19 +68,19 @@ void make_histos(string fName, int WINDOW_WIDTH, int SIGNAL_LOW, int SIGNAL_HIGH
         ClusterMultiplicity->SetXTitle("Multiplicity");
         ClusterMultiplicity->SetYTitle("# of events");
 
-        TH1S* ClusterSize = new TH1S("ClusterSize","Cluster size",16,0.5,16.5);
+        TH1S* ClusterSize = new TH1S("ClusterSize","Cluster size",16,-0.5,15.5);
         ClusterSize->SetXTitle("Multiplicity");
         ClusterSize->SetYTitle("# of events");
 
-        TH1S* ClusterPosition = new TH1S("ClusterPosition","Cluster position profile",31,15.75,31.25);
+        TH1S* ClusterPosition = new TH1S("ClusterPosition","Cluster position profile",31,-0.25,15.25);
         ClusterPosition->SetXTitle("Strip");
         ClusterPosition->SetYTitle("# of events");
 
-        TH1F* ClusterTime = new TH1F("ClusterTime","Cluster arrival time profile",WINDOW_WIDTH,0,WINDOW_WIDTH);
+        TH1F* ClusterTime = new TH1F("ClusterTime","Cluster arrival time profile",WINDOW_WIDTH/10,0,WINDOW_WIDTH);
         ClusterTime->SetXTitle("Time [ns]");
         ClusterTime->SetYTitle("# of events");
 
-        TH2F* ClusterProfile = new TH2F("ClusterProfile","Cluster map",31,15.75,31.25,WINDOW_WIDTH,0,WINDOW_WIDTH);
+        TH2F* ClusterProfile = new TH2F("ClusterProfile","Cluster map",31,-0.25,15.25,WINDOW_WIDTH/10,0,WINDOW_WIDTH);
         ClusterProfile->SetXTitle("Strip");
         ClusterProfile->SetYTitle("Time [ns]");
 

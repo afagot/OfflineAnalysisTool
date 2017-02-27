@@ -13,15 +13,7 @@ To be able to use the offline analysis tool, it is mandatory to have previously 
 
 Then follow the intalation steps on this page : **[HERE](https://root.cern.ch/drupal/content/installing-root-source)**.
 
-To compile the offline analysis project, first, open the makefile with a text editor, for example gedit, and modify the path to DAQ_HOME_DIR :
-
-    DAQ_HOME_DIR = /path/to/your/working/directory
-
-In the case of the GIF ++ computer, we have :
-
-    DAQ_HOME_DIR = /home/gifdaq/Desktop/OfflineAnalysisTool
-
-Then, simply do :
+To compile the offline analysis project, simply do :
 
     make
 
@@ -29,15 +21,15 @@ Then, simply do :
 
 There are 2 ways to use the executable file. Being in the previoulsly defined working directory, you can do :
 
-    ./offlineanalysis.sh [/path/to/datafile] [TriggerWindowWidth] [TimeEarliestSignals] [TimeLatestSignals]
+    ./OfflineAnalysis.sh [/path/to/datafile] [TriggerWindowWidth] [TimeEarliestSignals] [TimeLatestSignals]
 
 or simply
 
-    ./offlineanalysis.sh  [/path/to/datafile]
+    ./OfflineAnalysis.sh  [/path/to/datafile]
 
-then the default values for [TriggerWindowWidth], [TimeEarliestSignals] and [TimeLatestSignals] are 50000, 35025 and 35375 but may not be accurate. [TriggerWindowWidth] correspond to the value set in the DAQ software during the data acquisition. To have a good estimation of [TimeEarliestSignals] and [TimeLatestSignals], first do :
+then the default values for [TriggerWindowWidth], [TimeEarliestSignals] and [TimeLatestSignals] are 1000, 0 and 1000 but are not focussed on the cosmic muon peak. [TriggerWindowWidth] correspond to the value set in the DAQ software during the data acquisition. To have a good estimation of [TimeEarliestSignals] and [TimeLatestSignals], first do :
 
-    ./offlineanalysis.sh  [/path/to/datafile]
+    ./OfflineAnalysis.sh  [/path/to/datafile]
 
 then :
 
@@ -58,7 +50,7 @@ Finally, read the value of the first bin and last bin on the x-axis :
 
 Once you have all the needed values, you can do :
 
-    ./offlineanalysis.sh  [/path/to/datafile] [TriggerWindowWidth] [TimeEarliestSignals] [TimeLatestSignals]
+    ./OfflineAnalysis.sh  [/path/to/datafile] [TriggerWindowWidth] [TimeEarliestSignals] [TimeLatestSignals]
 
 And, in your datafile directory, print the efficiency and cluster size with :
 

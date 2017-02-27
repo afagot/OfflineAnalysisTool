@@ -153,7 +153,7 @@ void SortData(string fName){
                     float time = -1;
 
                         rawFile >> strip >> time;           //Save data pairs into the array.
-                    if(strip >= 16)
+                    if(strip < 16)
                         Data.push_back(make_pair(strip,time));
                 }
 

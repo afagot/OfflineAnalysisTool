@@ -9,6 +9,11 @@
 #include "../include/MsgSvc.h"
 #include "../include/utils.h"
 
+#include "TFile.h"
+#include "TH1S.h"
+#include "TH2S.h"
+#include "TH1F.h"
+
 using namespace std;
 
 //*****************************************************************************
@@ -146,14 +151,129 @@ float Get1DClusterCenter(vector< pair<int,float> >& Cluster) {
 //each event.
 
 void Analyse(string fName, float window, float start, float end){
+    //Open inputfile
     string dName = "SORTED_" + fName;
-    ifstream input(dName.c_str(),ios::in);                                          //Open inputfile
+    ifstream input(dName.c_str(),ios::in);
 
         if(input){
-            MSG_INFO("Open the file and start clusterization.\n");                  //If well open,
-            unsigned NameInPath = fName.find_last_of("/")+1;                        //open outputfile
+            MSG_INFO("Open the file and start clusterization.\n");
+
+            //******************** CLUSTERIZED FILE **********************
+
+            unsigned NameInPath = fName.find_last_of("/")+1;
             fName.insert(NameInPath,"CLUSTERIZED_");
             ofstream output(fName.c_str(),ios::out);
+
+            //******************** CSV OUTPUT FILE ***********************
+
+            if ( fName.substr(fName.find_last_of(".")) == ".dat" )
+                fName = fName.erase(fName.find_last_of("."));
+
+            string pathName = fName.substr(0,fName.find_last_of("/")+1);
+            string outputName = fName.substr(fName.find_first_of("_")+1);
+
+            string ResultName = pathName + "RESULT_" + outputName + ".csv";
+            ofstream ResultFile(ResultName.c_str(),ios::out);
+
+            //******************** ROOT OUTPUT FILE **********************
+
+            string fNameROOT = pathName + "ROOT_" + outputName + ".root";
+            TFile ResultROOT(fNameROOT.c_str(),"RECREATE");
+
+            //*********************** HISTOGRAMS *************************
+
+            //************ STRIPS
+
+            //Hit Profiles
+            TH1S* StripProfileX = new TH1S("StripProfileX","X Strip profile",8,-0.5,7.5);
+            StripProfileX->SetXTitle("Strip");
+            StripProfileX->SetYTitle("# of events");
+
+            TH1S* StripProfileY = new TH1S("StripProfileY","Y Strip profile",8,7.5,15.5);
+            StripProfileY->SetXTitle("Strip");
+            StripProfileY->SetYTitle("# of events");
+
+            //Time Profiles
+            TH1F* TimeProfileX = new TH1F("TimeProfileX","Arrival time profile of X hits",window/10,0,window);
+            TimeProfileX->SetXTitle("Time [ns]");
+            TimeProfileX->SetYTitle("# of events");
+
+            TH1F* TimeProfileY = new TH1F("TimeProfileY","Arrival time profile of Y hits",window/10,0,window);
+            TimeProfileY->SetXTitle("Time [ns]");
+            TimeProfileY->SetYTitle("# of events");
+
+            //Multiplicities
+            TH1S* HitMultiplicityX = new TH1S("HitMultiplicityX","Hit multiplicity of X hits",11,-0.5,10.5);
+            HitMultiplicityX->SetXTitle("Multiplicity");
+            HitMultiplicityX->SetYTitle("# of events");
+
+            TH1S* HitMultiplicityY = new TH1S("HitMultiplicityY","Hit multiplicity of Y hits",11,-0.5,10.5);
+            HitMultiplicityY->SetXTitle("Multiplicity");
+            HitMultiplicityY->SetYTitle("# of events");
+
+            //************ CLUSTERS
+
+            //Cluster Profiles
+            TH1S* ClusterProfileX = new TH1S("ClusterProfileX","X Cluster profile",15,-0.25,7.25);
+            ClusterProfileX->SetXTitle("Strip");
+            ClusterProfileX->SetYTitle("# of events");
+
+            TH1S* ClusterProfileY = new TH1S("ClusterProfileY","Y Cluster profile",15,7.75,15.25);
+            ClusterProfileY->SetXTitle("Strip");
+            ClusterProfileY->SetYTitle("# of events");
+
+            TH2S* ClusterProfileXY = new TH2S("ClusterProfileXY","XY Cluster profile",15,-0.25,7.25,15,7.75,15.25);
+            ClusterProfileXY->SetXTitle("Strip X");
+            ClusterProfileXY->SetYTitle("Strip Y");
+            ClusterProfileXY->SetZTitle("# of events");
+
+            //Time Profile
+            TH1F* ClusterTimeX = new TH1F("ClusterTimeX","Arrival time profile of X clusters",window/10,0,window);
+            ClusterTimeX->SetXTitle("Time [ns]");
+            ClusterTimeX->SetYTitle("# of events");
+
+            TH1F* ClusterTimeY = new TH1F("ClusterTimeY","Arrival time profile of Y clusters",window/10,0,window);
+            ClusterTimeY->SetXTitle("Time [ns]");
+            ClusterTimeY->SetYTitle("# of events");
+
+            TH1F* ClusterTimeXY = new TH1F("ClusterTimeY","Arrival time profile of XY clusters",window/10,0,window);
+            ClusterTimeXY->SetXTitle("Time [ns]");
+            ClusterTimeXY->SetYTitle("# of events");
+
+            //Multiplicities
+            TH1S* ClusterMultiplicityX = new TH1S("ClusterMultiplicityX","Cluster multiplicity of X clusters",11,-0.5,10.5);
+            ClusterMultiplicityX->SetXTitle("Multiplicity");
+            ClusterMultiplicityX->SetYTitle("# of events");
+
+            TH1S* ClusterMultiplicityY = new TH1S("ClusterMultiplicityY","Cluster multiplicity of Y clusters",11,-0.5,10.5);
+            ClusterMultiplicityY->SetXTitle("Multiplicity");
+            ClusterMultiplicityY->SetYTitle("# of events");
+
+            TH1S* ClusterMultiplicityXY = new TH1S("ClusterMultiplicityXY","Cluster multiplicity of XY clusters",11,-0.5,10.5);
+            ClusterMultiplicityXY->SetXTitle("Multiplicity");
+            ClusterMultiplicityXY->SetYTitle("# of events");
+
+            //Cluster Sizes
+            TH1S* ClusterSizeX = new TH1S("ClusterSizeX","Size of X cluster",8,0.5,8.5);
+            ClusterSizeX->SetXTitle("Multiplicity");
+            ClusterSizeX->SetYTitle("# of events");
+
+            TH1S* ClusterSizeY = new TH1S("ClusterSizeY","Size of Y cluster",8,0.5,8.5);
+            ClusterSizeY->SetXTitle("Multiplicity");
+            ClusterSizeY->SetYTitle("# of events");
+
+            TH2S* ClusterSizeXY = new TH2S("ClusterSizeXY","Size of XY cluster",8,0.5,8.5,8,0.5,8.5);
+            ClusterSizeXY->SetXTitle("Multiplicity X");
+            ClusterSizeXY->SetYTitle("Multiplicity Y");
+            ClusterSizeXY->SetZTitle("# of events");
+
+            //************ EFFICIENCY
+
+            TH1S* Efficiency = new TH1S("Efficiency","Detection efficiency",2,-0.5,1.5);
+            Efficiency->SetXTitle("(Not detected/Detected)");
+            Efficiency->SetYTitle("# of events");
+
+            //********************* READ DATA ****************************
 
             while(input.good()){                                                    //If well open
                 int nEvent = -1;
@@ -164,8 +284,10 @@ void Analyse(string fName, float window, float start, float end){
                                                                                     //number of hits in event
                 vector< vector< pair<int,float> > > ClusterListX;
                 vector< vector< pair<int,float> > > ClusterListY;
+                vector< vector< pair<int,float> > > ClusterListXY;
                 ClusterListX.clear();
                 ClusterListY.clear();
+                ClusterListXY.clear();
 
 
                 if(nEvent == -1 && nHitsX == -1 && nHitsY == -1){                   //If they are still at their
@@ -238,8 +360,41 @@ void Analyse(string fName, float window, float start, float end){
                         TimeCluster.clear();
                     }
                     PrintClusters(nEvent,ClusterListY,output);
+
+                    if(ClusterListX.size() > 0 && ClusterListY.size() > 0){
+                        for(unsigned int x = 0; x<ClusterListX.size(); x++){
+                            for(unsigned int y = 0; y<ClusterListY.size(); y++){
+
+                            }
+                        }
+                    }
                 }
             }
+
+            StripProfileX->Write();
+            StripProfileY->Write();
+            TimeProfileX->Write();
+            TimeProfileY->Write();
+            HitMultiplicityX->Write();
+            HitMultiplicityY->Write();
+
+            ClusterProfileX->Write();
+            ClusterProfileY->Write();
+            ClusterProfileXY->Write();
+            ClusterTimeX->Write();
+            ClusterTimeY->Write();
+            ClusterTimeXY->Write();
+            ClusterMultiplicityX->Write();
+            ClusterMultiplicityY->Write();
+            ClusterMultiplicityXY->Write();
+            ClusterSizeX->Write();
+            ClusterSizeY->Write();
+            ClusterSizeXY->Write();
+
+            Efficiency->Write();
+
+            ResultROOT.Close();
+            ResultFile.close();
             output.close();
         } else {
             MSG_ERROR("Couldn't open data file to clusterize.\n");

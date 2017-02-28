@@ -11,8 +11,9 @@ DAQ_INC_DIR = $(DAQ_HOME_DIR)/include
 DAQ_SRC_DIR = $(DAQ_HOME_DIR)/src
 DAQ_OBJ_DIR = $(DAQ_HOME_DIR)/obj
 
-ROOT_INC  = $(ROOTSYS)/include
-ROOTLIBS     := $(shell root-config --libs)
+ROOT_INC := $(ROOTSYS)/include
+ROOTCFLAGS := $(shell root-config --cflags)
+ROOTLIBS := $(shell root-config --libs)
 
 LFLAGS     = -L$(DAQ_HOME_DIR)/lib -L/usr/lib \
              $(ROOTLIBS) 
@@ -20,15 +21,36 @@ LFLAGS     = -L$(DAQ_HOME_DIR)/lib -L/usr/lib \
 CFLAGS     = -ggdb -fPIC -DLINUX -Wall -funsigned-char \
              -I$(DAQ_INC_DIR) -I$(ROOT_INC)
 
+CC = g++ -std=c++11
+
 all: analysis
 
-analysis: 	main.o Clusters.o SortDataFile.o
-	g++ $(CFLAGS) $(DAQ_OBJ_DIR)/main.o \
+analysis: main.o Clusters.o SortDataFile.o utils.o
+	$(CC) $(CFLAGS) $(DAQ_OBJ_DIR)/main.o \
 	$(DAQ_OBJ_DIR)/Clusters.o \
 	$(DAQ_OBJ_DIR)/SortDataFile.o \
+	$(DAQ_OBJ_DIR)/utils.o \
         -o $(DAQ_BIN_DIR)/analysis \
         $(LFLAGS)  \
         -l CAENVME -l curses
+
+main.o:
+	$(CC) $(CFLAGS) -c $(DAQ_SRC_DIR)/main.cc -o $(DAQ_OBJ_DIR)/main.o
+Clusters.o:
+	$(CC) $(CFLAGS) -c $(DAQ_SRC_DIR)/Clusters.cc -o $(DAQ_OBJ_DIR)/Clusters.o
+SortDataFile.o:
+	$(CC) $(CFLAGS) -c $(DAQ_SRC_DIR)/SortDataFile.cc -o $(DAQ_OBJ_DIR)/SortDataFile.o
+utils.o:
+	$(CC) $(CFLAGS) -c $(DAQ_SRC_DIR)/utils.cc -o $(DAQ_OBJ_DIR)/utils.o
+
+$(RUN_REGISTRY):
+	mkdir -p $(RUN_REGISTRY)/
+
+$(DAQ_BIN_DIR):
+	mkdir -p $(DAQ_BIN_DIR)/
+
+$(DAQ_OBJ_DIR):
+	mkdir -p $(DAQ_OBJ_DIR)/
 
 clean:
 	-rm $(DAQ_BIN_DIR)/analysis
@@ -37,10 +59,3 @@ clean:
 remove:
 	-rm $(DAQ_BIN_DIR)/analysis
 	-rm $(DAQ_OBJ_DIR)/*.o
-
-main.o:
-	g++ -c $(CFLAGS) $(DAQ_SRC_DIR)/main.cc -o $(DAQ_OBJ_DIR)/main.o
-Clusters.o:
-	g++ -c $(CFLAGS) $(DAQ_SRC_DIR)/Clusters.cc -o $(DAQ_OBJ_DIR)/Clusters.o
-SortDataFile.o:
-	g++ -c $(CFLAGS) $(DAQ_SRC_DIR)/SortDataFile.cc -o $(DAQ_OBJ_DIR)/SortDataFile.o

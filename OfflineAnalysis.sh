@@ -1,5 +1,9 @@
 #!/bin/bash
 
+rm -r $1/DAT/
+rm -r $1/CSV/
+rm -r $1/ROOT/
+
 cp $1/*.dat .
 
 for dFile in *.dat
@@ -10,7 +14,7 @@ done
 
 for dFile in CLUSTERIZED*
 do
-	root -l -q 'make_histos.cc+("'$dFile'",'${2-1000}','${3-460}','${4-495}')';
+	root -l -q 'make_histos.cc+("'$dFile'",'${2-1000}','${3-0}','${4-1000}')';
 done
 
 mkdir -p $1/DAT/

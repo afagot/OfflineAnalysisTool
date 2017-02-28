@@ -1,11 +1,12 @@
 // **********************************************************************
 // *   Hit sorting functions
 // *   Alexis Fagot
-// *   2/3/2015
+// *   27/02/2017
 // *********************************************************************
 
 #include "../include/SortDataFile.h"
 #include "../include/MsgSvc.h"
+#include "../include/utils.h"
 
 using namespace std;
 
@@ -45,7 +46,7 @@ int RandomPivot(int first,int last){        //Return a random element index in r
 //*************************************************************************************
 
 int Partition(vector< pair<int,float> >& A, int f, int l, string option){
-    pair<int,float> tPair;                    //Temporary pair to help swaping elements.
+    pair<int,float> tPair;                  //Temporary pair to help swaping elements.
 
     int p = RandomPivot(f,l);               //Pick a random element as pivot and then
     tPair = A[p];                           //swap the pivot element with the last one.
@@ -79,7 +80,6 @@ int Partition(vector< pair<int,float> >& A, int f, int l, string option){
 void SortEvent(vector< pair<int,float> >& A, int f, int l, string option){
     if(f < l){
         int pivot = Partition(A,f,l,option);//Partition your array and get the pivot.
-
         if(A.size() > 2){
             if(pivot != f)
                 SortEvent(A,f,pivot-1,option);//Partition the lower sub-array.
@@ -96,28 +96,23 @@ void SortEvent(vector< pair<int,float> >& A, int f, int l, string option){
 //This function sorts data by increasing strip number or increasing time stamp.
 //Data format is :
 
-//EventCount \t NumOfHits
-//Channel \t TimeStamp
-//Channel \t TimeStamp
-//Channel \t TimeStamp
-//Channel \t TimeStamp
-//Channel \t TimeStamp
-//Channel \t TimeStamp
-//EventCount \t NumOfHits
-//Channel \t TimeStamp
-//Channel \t TimeStamp
-//Channel \t TimeStamp
-//EventCount \t NumOfHits
-//Channel \t TimeStamp
-//Channel \t TimeStamp
-//Channel \t TimeStamp
-//Channel \t TimeStamp
-//Channel \t TimeStamp
-//EventCount \t NumOfHits
-//Channel \t TimeStamp
-//Channel \t TimeStamp
-//Channel \t TimeStamp
-//Channel \t TimeStamp
+//EventCount \t NumOfHitsX \t NumberOfHitsY
+//ChannelX \t TimeStampX
+//ChannelX \t TimeStampX
+//ChannelX \t TimeStampX
+//ChannelY \t TimeStampY
+//ChannelY \t TimeStampY
+//EventCount \t NumOfHitsX \t NumberOfHitsY
+//ChannelX \t TimeStampX
+//ChannelX \t TimeStampX
+//ChannelY \t TimeStampY
+//ChannelY \t TimeStampY
+//ChannelY \t TimeStampY
+//EventCount \t NumOfHitsX \t NumberOfHitsY
+//ChannelX \t TimeStampX
+//ChannelY \t TimeStampY
+//ChannelY \t TimeStampY
+//ChannelY \t TimeStampY
 //...
 
 //with a line of 0s in between each event (trigger).
@@ -131,12 +126,14 @@ void SortData(string fName){
         if(rawFile.get() == '#') GotoLine(rawFile,3);
         else rawFile.seekg(ios::beg);
 
-        vector < pair<int,float> > Data;                //Array to contain hit list for
-        Data.clear();                                   //each event.
+        vector < pair<int,float> > XData;               //Array to contain hit list for
+        XData.clear();                                  //each event in X readout.
 
-        unsigned NameInPath = fName.find_last_of("/")+1;
-        fName.insert(NameInPath,"SORTED_");
-        ofstream sortedFile(fName.c_str(), ios::out);   //Open output file in write mode.
+        vector < pair<int,float> > YData;               //Array to contain hit list for
+        YData.clear();                                  //each event in Y readout.
+
+        string oName =  "SORTED_" + fName;
+        ofstream sortedFile(oName.c_str(), ios::out);   //Open output file in write mode.
 
         while(rawFile.good()){
             int nEvent = -1;
@@ -146,32 +143,40 @@ void SortData(string fName){
 
             if(nEvent == -1 && nHits == -1){            //If nothing is read, this is the
                 MSG_INFO("End of sorting.\n");          //end.
-                break;
+                rawFile.close();
+                return;
             } else {
                 for(int h=0; h<nHits; h++){             //else loop on every hit.
                     int strip = -1;
                     float time = -1;
 
-                        rawFile >> strip >> time;           //Save data pairs into the array.
-                    if(strip < 16)
-                        Data.push_back(make_pair(strip,time));
+                        rawFile >> strip >> time;       //Save data pairs into the array.
+                    if(strip < 8)
+                        XData.push_back(make_pair(strip,time));
+                    else if(strip < 16)
+                        YData.push_back(make_pair(strip,time));
                 }
 
-                if(Data.size() > 0)                     //Sort the array per time stamp.
-                    SortEvent(Data,0,Data.size()-1,"TIME");
-                                                        //Print the sorted data
-                sortedFile << nEvent << " " << Data.size() << endl;
+                //Sort the arrays per time stamp and print the sorted data
+                if(XData.size() > 1) SortEvent(XData,0,XData.size()-1,"TIME");
+                if(YData.size() > 1) SortEvent(YData,0,YData.size()-1,"TIME");
 
-                for(unsigned int h = 0; h < Data.size(); h++){
-                    sortedFile << Data[h].first << " " << Data[h].second << endl;
+                sortedFile << nEvent << '\t' << XData.size() << '\t' << YData.size() << endl;
+
+                for(unsigned int h = 0; h < XData.size(); h++){
+                    sortedFile << '\t' << XData[h].first << '\t' << XData[h].second << endl;
                 }
-                Data.clear();
+                XData.clear();
+
+                for(unsigned int h = 0; h < YData.size(); h++){
+                    sortedFile << '\t' << YData[h].first << '\t' << YData[h].second << endl;
+                }
+                YData.clear();
             }
         }
         sortedFile.close();
     } else {
         MSG_ERROR("Couldn't open data file to sort.\n");
-        exit(EXIT_FAILURE);
+        return;
     }
-    rawFile.close();
 }

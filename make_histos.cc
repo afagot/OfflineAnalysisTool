@@ -32,17 +32,14 @@ void make_histos(string fName, int WINDOW_WIDTH, int SIGNAL_LOW, int SIGNAL_HIGH
 
     if ( fName.substr(fName.find_last_of(".")) == ".dat" )
         fName = fName.erase(fName.find_last_of("."));
-    unsigned EndOfPath = fName.find_last_of("/")+1;
 
-    string pathName = fName.substr(0,EndOfPath);
-    string outputName = fName.substr(fName.find("SORTED_")+7);
+    string pathName = fName.substr(0,fName.find_last_of("/")+1);
+    string outputName = fName.substr(fName.find_first_of("_")+1);
 
-    string ResultName = pathName + outputName + ".csv";
-    ResultName.insert(EndOfPath,"RESULT_");
+    string ResultName = pathName + "RESULT_" + outputName + ".csv";
     ofstream ResultFile(ResultName.c_str(),ios::out);
 
-    string fNameROOT = pathName + outputName + ".root";
-    fNameROOT.insert(EndOfPath,"ROOT_");
+    string fNameROOT = pathName + "ROOT_" + outputName + ".root";
     TFile ResultROOT(fNameROOT.c_str(),"RECREATE");
 
     //********************************************************************
@@ -113,7 +110,7 @@ void make_histos(string fName, int WINDOW_WIDTH, int SIGNAL_LOW, int SIGNAL_HIGH
 
                     if(Cluster == 0 || cSize == 0){
                         printf("Error : problem with cluster %d on event %d\n",c,Event);
-                        exit(EXIT_FAILURE);
+                        return;
                     }
 
                     float cPosition = 0;
@@ -127,7 +124,7 @@ void make_histos(string fName, int WINDOW_WIDTH, int SIGNAL_LOW, int SIGNAL_HIGH
 
                         if(channel == -1 || time == -1){
                             printf("Error : problem with hit %d of cluster %d on event %d\n",h,c,Event);
-                            exit(EXIT_FAILURE);
+                            return;
                         }
                         cPosition += channel;
                         if(cTime == 0 || time < cTime) cTime = time;

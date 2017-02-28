@@ -275,13 +275,18 @@ void Analyse(string fName, float window, float start, float end){
 
             //********************* READ DATA ****************************
 
-            while(input.good()){                                                    //If well open
+            while(input.good()){
                 int nEvent = -1;
                 int nHitsX = -1;
                 int nHitsY = -1;
 
-                input >> nEvent >> nHitsX >> nHitsY;                                //Read event label and
-                                                                                    //number of hits in event
+                //Read the event number and number of hits on the X and Y
+                //readouts
+                input >> nEvent >> nHitsX >> nHitsY;
+
+                //The clusters will be vectors of pairs.
+                //They are stored in a vector to get a list of
+                //clusters.
                 vector< vector< pair<int,float> > > ClusterListX;
                 vector< vector< pair<int,float> > > ClusterListY;
                 vector< vector< pair<int,float> > > ClusterListXY;
@@ -289,42 +294,54 @@ void Analyse(string fName, float window, float start, float end){
                 ClusterListY.clear();
                 ClusterListXY.clear();
 
-
-                if(nEvent == -1 && nHitsX == -1 && nHitsY == -1){                   //If they are still at their
-                    MSG_INFO("End of clusterization.\n");                           //initial values, this is the
+                //Check if end of file
+                if(nEvent == -1 && nHitsX == -1 && nHitsY == -1){
+                    MSG_INFO("End of clusterization.\n");
                     input.close();
-                    return;                                                          //end of the data file.
-                } else {                                                            //Else,
+                    return;
+                } else {
+                    //Fill hit multiplicity histograms
+                    HitMultiplicityX->Fill(nHitsX);
+                    HitMultiplicityY->Fill(nHitsY);
+
+                    //Start looping over the hits and reconstruct 1D clusters
                     vector< pair<int,float> > TimeCluster, StripCluster;
                     TimeCluster.clear();
                     StripCluster.clear();
 
                     if(nHitsX > 0){
-                        for(int h = 0; h < nHitsX; h++){                                //loop on the hits in X array
-                            int strip = -1;                                             //to make clusters.
+                        for(int h = 0; h < nHitsX; h++){
+                            int strip = -1;
                             float time = -1;
 
-                            input >> strip >> time;                                     //Read each channel/time pairs
+                            //Read the strip number and time stamp of each
+                            //hit in the X readout
+                            input >> strip >> time;
 
-                            if(time == -1 && strip == -1){                              //If there is nothing in the file
-                                MSG_ERROR("Problem with the X event : %d\n",nEvent);    //This is a problem !
+                            if(time == -1 && strip == -1){
+                                MSG_ERROR("Problem with the X event : %d\n",nEvent);
                                 return;
-                            } else {                                                    //Else, in the case...
-                                if(TimeCluster.size() > 0){                             //... the array isn't empty,
-                                    if(IsInCluster(time,TimeCluster,"TIME")){           //check if the hit is on time
-                                        TimeCluster.push_back(make_pair(strip,time));   //and add it to the array.
-                                    } else {                                            //If not, sort the array and
-                                        GroupStrips(TimeCluster,StripCluster,ClusterListX);//make strip clusters from it.
-                                        TimeCluster.clear();                            //Clear the array and fill
-                                        TimeCluster.push_back(make_pair(strip,time));   //it with this hit.
+                            } else {
+                                //Fill the hit and time profile histograms
+                                StripProfileX->Fill(strip);
+                                TimeProfileX->Fill(time);
+
+                                //build clusters
+                                if(TimeCluster.size() > 0){
+                                    if(IsInCluster(time,TimeCluster,"TIME")){
+                                        TimeCluster.push_back(make_pair(strip,time));
+                                    } else {
+                                        GroupStrips(TimeCluster,StripCluster,ClusterListX);
+                                        TimeCluster.clear();
+                                        TimeCluster.push_back(make_pair(strip,time));
                                     }
-                                } else {                                                //... the array is empty,
-                                    TimeCluster.push_back(make_pair(strip,time));       //initialise it with this
-                                }                                                       //hit.
+                                } else {
+                                    TimeCluster.push_back(make_pair(strip,time));
+                                }
                             }
                         }
-                        GroupStrips(TimeCluster,StripCluster,ClusterListX);             //Sort the very last time array
-                        TimeCluster.clear();                                            //make clusters and clear.
+                        GroupStrips(TimeCluster,StripCluster,ClusterListX);
+                        TimeCluster.clear();
                     }
                     PrintClusters(nEvent,ClusterListX,output);
                     TimeCluster.clear();
@@ -336,6 +353,8 @@ void Analyse(string fName, float window, float start, float end){
                             int strip = -1;
                             float time = -1;
 
+                            //Read the strip number and time stamp of each
+                            //hit in the Y readout
                             input >> strip >> time;
 
                             if(time == -1 && strip == -1){
@@ -343,6 +362,11 @@ void Analyse(string fName, float window, float start, float end){
                                 cout << nEvent << endl;
                                 return;
                             } else {
+                                //Fill the hit and time profile histograms
+                                StripProfileY->Fill(strip);
+                                TimeProfileY->Fill(time);
+
+                                //build clusters
                                 if(TimeCluster.size() > 0){
                                     if(IsInCluster(time,TimeCluster,"TIME")){
                                         TimeCluster.push_back(make_pair(strip,time));

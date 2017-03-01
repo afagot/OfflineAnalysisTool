@@ -347,6 +347,14 @@ void Analyse(string fName, float window, float start, float end){
                     TimeCluster.clear();
                     StripCluster.clear();
 
+                    //Fill the 1D cluster histograms
+                    ClusterMultiplicityX->Fill(ClusterListX.size());
+                    for(unsigned int c = 0; c < ClusterListX.size(); c++){
+                        ClusterProfileX->Fill(Get1DClusterCenter(ClusterListX[c]));
+                        ClusterTimeX->Fill(GetClusterStart(ClusterListX[c]));
+                        ClusterSizeX->Fill(ClusterListX[c].size());
+                    }
+
                     //Repeat the same for the Y array data
                     if(nHitsY > 0){
                         for(int h = 0; h < nHitsY; h++){
@@ -384,7 +392,18 @@ void Analyse(string fName, float window, float start, float end){
                         TimeCluster.clear();
                     }
                     PrintClusters(nEvent,ClusterListY,output);
+                    TimeCluster.clear();
+                    StripCluster.clear();
 
+                    //Fill the 1D cluster histograms
+                    ClusterMultiplicityY->Fill(ClusterListY.size());
+                    for(unsigned int c = 0; c < ClusterListY.size(); c++){
+                        ClusterProfileY->Fill(Get1DClusterCenter(ClusterListY[c]));
+                        ClusterTimeY->Fill(GetClusterStart(ClusterListY[c]));
+                        ClusterSizeY->Fill(ClusterListY[c].size());
+                    }
+
+                    //Loop over clusters and build 2D clusters
                     if(ClusterListX.size() > 0 && ClusterListY.size() > 0){
                         for(unsigned int x = 0; x<ClusterListX.size(); x++){
                             for(unsigned int y = 0; y<ClusterListY.size(); y++){

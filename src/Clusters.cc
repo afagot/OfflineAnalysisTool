@@ -20,9 +20,9 @@ using namespace std;
 //This function adds the hit array into the cluster list as new cluster and
 //clears the hit array.
 
-void AddCluster2List(vector< pair<int,float> >& Cluster, vector < vector< pair<int,float> > >& ClusterList){
-    ClusterList.push_back(Cluster);
-    Cluster.clear();
+void AddCluster2List(Cluster& cluster, ClusterList& cList){
+    cList.push_back(cluster);
+    cluster.clear();
 }
 
 //*****************************************************************************
@@ -48,15 +48,15 @@ void AddCluster2List(vector< pair<int,float> >& Cluster, vector < vector< pair<i
 //HitN          TimeN
 
 
-void PrintClusters(int Event, vector< vector< pair<int,float> > >& ClusterList, ostream& output){
-    if(ClusterList.size() == 1 && ClusterList[0].size() == 0)
+void PrintClusters(int event, ClusterList& cList, ostream& output){
+    if(cList.size() == 1 && cList[0].size() == 0)
         MSG_WARNING("Skipped empty cluster\n");
     else{
-        output << Event << " " << ClusterList.size() <<endl;
-        for(unsigned int c = 0; c < ClusterList.size(); c++){
-            output << '\t' << c+1 << " " << ClusterList[c].size() << endl;
-            for(unsigned int h = 0; h < ClusterList[c].size(); h++){
-                output << '\t' << '\t' << ClusterList[c][h].first << " " << ClusterList[c][h].second << endl;
+        output << event << " " << cList.size() <<endl;
+        for(unsigned int c = 0; c < cList.size(); c++){
+            output << '\t' << c+1 << " " << cList[c].size() << endl;
+            for(unsigned int h = 0; h < cList[c].size(); h++){
+                output << '\t' << '\t' << cList[c][h].first << " " << cList[c][h].second << endl;
             }
         }
     }
@@ -65,7 +65,7 @@ void PrintClusters(int Event, vector< vector< pair<int,float> > >& ClusterList, 
 //*****************************************************************************
 //Function that returns if the hit is part of the cluster.
 
-bool IsInCluster(int hit, vector< pair<int,float> > cluster, string option){
+bool IsInCluster(int hit, Cluster cluster, string option){
     if(option == "TIME")                                                            //Time condition for cluters :
         return hit-cluster.front().second < 10.0;                                   //10 ns wide (unit = 100 ps).
     else if(option == "STRIP")                                                      //Strip condition for clusters :
@@ -78,7 +78,7 @@ bool IsInCluster(int hit, vector< pair<int,float> > cluster, string option){
 //Function that groups neighbor hits, among an an array of "on time" hits, in
 //order to make the clusters.
 
-void GroupStrips(vector< pair<int,float> >& tCluster, vector< pair<int,float> >& sCluster, vector< vector< pair<int,float> > >& cList){
+void GroupStrips(Cluster& tCluster, Cluster& sCluster, ClusterList& cList){
     if(tCluster.size() > 1) SortEvent(tCluster,0,tCluster.size()-1,"STRIP");        //Sort your time array by
                                                                                     //increasing strip number.
 
@@ -106,23 +106,23 @@ void GroupStrips(vector< pair<int,float> >& tCluster, vector< pair<int,float> >&
 //Function that returns the time a cluster started. This will be used to group
 //X and Y clusters into 1.
 
-float GetClusterStart(vector< pair<int,float> >& Cluster) {
+float GetClusterStart(Cluster& cluster){
     //First sort back the cluster by time (indeed the cluster was
     //formed by sorting by strips)
-    if(Cluster.size() > 1) SortEvent(Cluster,0,Cluster.size()-1,"TIME");
+    if(cluster.size() > 1) SortEvent(cluster,0,cluster.size()-1,"TIME");
 
     //return the time of the first hit in the cluster
-    return Cluster[0].second;
+    return cluster.front().second;
 }
 
 //*****************************************************************************
 //Function that returns a bool to tell us if the time arrival of X and Y
 //clusters coincides. This will be used to groupe X and Y clusters into 1.
 
-bool Is2DCluster(vector< pair<int,float> >& ClusterX, vector< pair<int,float> >& ClusterY) {
+bool Is2DCluster(Cluster clusterX, Cluster clusterY){
     //Get both cluster starting time stamps
-    float xTime = GetClusterStart(ClusterX);
-    float yTime = GetClusterStart(ClusterY);
+    float xTime = GetClusterStart(clusterX);
+    float yTime = GetClusterStart(clusterY);
 
     //Use the 10ns condition to test if they are part of the same cluster
     return abs(xTime-yTime) <= 10.;
@@ -132,15 +132,15 @@ bool Is2DCluster(vector< pair<int,float> >& ClusterX, vector< pair<int,float> >&
 //Function that returns the center a cluster. This will then be used to get the
 //position of the clusters to fill in histograms.
 
-float Get1DClusterCenter(vector< pair<int,float> >& Cluster) {
+float Get1DClusterCenter(Cluster cluster){
     float center = 0.;
 
     //Sum all the strip numbers in the cluster
-    for(unsigned int i; i<Cluster.size(); i++)
-        center += Cluster[i].first;
+    for(unsigned int i; i<cluster.size(); i++)
+        center += cluster[i].first;
 
     //divide by the cluster size
-    center /= Cluster.size();
+    center = center/cluster.size();
 
     return center;
 }
@@ -289,9 +289,7 @@ void Analyse(string fName, float window, float start, float end){
             //The clusters will be vectors of pairs.
             //They are stored in a vector to get a list of
             //clusters.
-            vector< vector< pair<int,float> > > ClusterListX;
-            vector< vector< pair<int,float> > > ClusterListY;
-            vector< vector< pair<int,float> > > ClusterListXY;
+            ClusterList ClusterListX, ClusterListY, ClusterListXY;
             ClusterListX.clear();
             ClusterListY.clear();
             ClusterListXY.clear();
@@ -305,7 +303,7 @@ void Analyse(string fName, float window, float start, float end){
                 HitMultiplicityY->Fill(nHitsY);
 
                 //Start looping over the hits and reconstruct 1D clusters
-                vector< pair<int,float> > TimeCluster, StripCluster;
+                Cluster TimeCluster, StripCluster;
                 TimeCluster.clear();
                 StripCluster.clear();
 
@@ -350,8 +348,12 @@ void Analyse(string fName, float window, float start, float end){
                 //Fill the 1D cluster histograms
                 ClusterMultiplicityX->Fill(ClusterListX.size());
                 for(unsigned int c = 0; c < ClusterListX.size(); c++){
-                    ClusterProfileX->Fill(Get1DClusterCenter(ClusterListX[c]));
-                    ClusterTimeX->Fill(GetClusterStart(ClusterListX[c]));
+                    float center = Get1DClusterCenter(ClusterListX[c]);
+                    ClusterProfileX->Fill(center);
+
+                    float time = GetClusterStart(ClusterListX[c]);
+                    ClusterTimeX->Fill(time);
+
                     ClusterSizeX->Fill(ClusterListX[c].size());
                 }
 
@@ -398,22 +400,56 @@ void Analyse(string fName, float window, float start, float end){
                 //Fill the 1D cluster histograms
                 ClusterMultiplicityY->Fill(ClusterListY.size());
                 for(unsigned int c = 0; c < ClusterListY.size(); c++){
-                    ClusterProfileY->Fill(Get1DClusterCenter(ClusterListY[c]));
-                    ClusterTimeY->Fill(GetClusterStart(ClusterListY[c]));
+                    float center = Get1DClusterCenter(ClusterListY[c]);
+                    ClusterProfileY->Fill(center);
+
+                    float time = GetClusterStart(ClusterListY[c]);
+                    ClusterTimeY->Fill(time);
+
                     ClusterSizeY->Fill(ClusterListY[c].size());
                 }
 
                 //Loop over clusters and build 2D clusters
                 if(ClusterListX.size() > 0 && ClusterListY.size() > 0){
+                    //For each 1D cluster on X readout
                     for(unsigned int x = 0; x<ClusterListX.size(); x++){
+                        //Check if the clusters on Y readout have a
+                        //comparable starting time stamp
                         for(unsigned int y = 0; y<ClusterListY.size(); y++){
+                            if(Is2DCluster(ClusterListX[x],ClusterListY[y])){
+                                //In this case, fill the 2D profile with
+                                //both X and Y cluster positions
+                                float xCenter = Get1DClusterCenter(ClusterListX[x]);
+                                float yCenter = Get1DClusterCenter(ClusterListY[y]);
+                                ClusterProfileXY->Fill(xCenter,yCenter);
 
+                                //Get the earliest starting time stamp
+                                //as time stamp of the 2D cluster
+                                float xTime = GetClusterStart(ClusterListX[x]);
+                                float yTime = GetClusterStart(ClusterListY[y]);
+                                ClusterTimeXY->Fill(fmax(xTime,yTime));
+
+                                //Use a temporary cluster to fill the 2D
+                                //cluster list
+                                Cluster tmpCluster;
+                                tmpCluster.insert(tmpCluster.begin(),ClusterListX[x].begin(),ClusterListX[x].end());
+                                tmpCluster.insert(tmpCluster.begin(),ClusterListY[y].begin(),ClusterListY[y].end());
+                                ClusterListXY.push_back(tmpCluster);
+
+                                //Fill the 2D cluster size histo with the
+                                //size of both X and Y clusters
+                                ClusterSizeXY->Fill(ClusterListX[x].size(),ClusterListY[y].size());
+                            }
                         }
                     }
+                    //Fill the multiplicity of 2D clusters defined as the
+                    //number of 2D clusters
+                    ClusterMultiplicityXY->Fill(ClusterListXY.size());
                 }
             }
         }
 
+        //Write all histograms into the ROOT file
         StripProfileX->Write();
         StripProfileY->Write();
         TimeProfileX->Write();
@@ -436,6 +472,7 @@ void Analyse(string fName, float window, float start, float end){
 
         Efficiency->Write();
 
+        //Close the files
         ResultROOT.Close();
         ResultFile.close();
         output.close();

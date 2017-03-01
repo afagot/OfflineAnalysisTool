@@ -18,10 +18,16 @@
 
 using namespace std;
 
-void AddCluster2List(vector< pair<int,float> >& Cluster, vector < vector< pair<int,float> > >& ClusterList);
-void PrintClusters(int Event, vector< vector< pair<int,float> > >& ClusterList, ostream& output);
-bool IsInCluster(int hit, vector< pair<int,float> > cluster, string option);
-void GroupStrips(vector< pair<int,float> >& tCluster, vector< pair<int,float> >& sCluster, vector< vector< pair<int,float> > >& cList);
-void Analyse(string fName, float window, float start, float end);
+typedef std::vector< std::pair<int,float> > Cluster;
+typedef std::vector< Cluster > ClusterList;
+
+void  AddCluster2List(Cluster& cluster, ClusterList& cList);
+void  PrintClusters(int event, ClusterList& cList, ostream& output);
+bool  IsInCluster(int hit, Cluster cluster, string option);
+void  GroupStrips(Cluster &tCluster, Cluster& sCluster, ClusterList& cList);
+float GetClusterStart(Cluster& cluster);
+bool  Is2DCluster(Cluster clusterX, Cluster clusterY);
+float Get1DClusterCenter(Cluster cluster);
+void  Analyse(string fName, float window, float start, float end);
 
 #endif // CLUSTERS_H

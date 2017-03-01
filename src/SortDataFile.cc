@@ -120,7 +120,7 @@ void SortEvent(vector< pair<int,float> >& A, int f, int l, string option){
 void SortData(string fName){
     ifstream rawFile(fName.c_str(),ios::in);            //Open data file in read mode.
 
-    if(rawFile){
+    if(rawFile.is_open()){
         MSG_INFO("Open the file and start sorting.\n");
 
         if(rawFile.get() == '#') GotoLine(rawFile,3);
@@ -132,7 +132,8 @@ void SortData(string fName){
         vector < pair<int,float> > YData;               //Array to contain hit list for
         YData.clear();                                  //each event in Y readout.
 
-        string oName =  "SORTED_" + fName;
+        unsigned NameInPath = fName.find_last_of("/")+1;
+        string oName = fName.insert(NameInPath,"DAT/SORTED_");
         ofstream sortedFile(oName.c_str(), ios::out);   //Open output file in write mode.
 
         while(rawFile.good()){

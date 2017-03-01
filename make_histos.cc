@@ -44,7 +44,7 @@ void make_histos(string fName, int WINDOW_WIDTH, int SIGNAL_LOW, int SIGNAL_HIGH
 
     //********************************************************************
 
-    if(SortedFile){
+    if(SortedFile.is_open()){
         TH1S* StripProfile = new TH1S("StripProfile","Strip profile",16,-0.5,15.5);
         StripProfile->SetXTitle("Strip");
         StripProfile->SetYTitle("# of events");

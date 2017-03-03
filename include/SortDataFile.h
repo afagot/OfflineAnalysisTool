@@ -18,12 +18,14 @@
 #include <ctime>
 #include <limits>
 
+#include "Clusters.h"
+
 using namespace std;
 
 ifstream& GotoLine(ifstream &file, unsigned int line);
 int RandomPivot(int first,int last);
-int Partition(vector< pair<int,float> >& A, int f, int l, string option);
-void SortEvent(vector< pair<int,float> >& A, int f, int l, string option);
+int Partition(Cluster& A, int f, int l, string option);
+void SortEvent(Cluster& A, int f, int l, string option);
 void SortData(string fName);
 
 #endif // SORTDATAFILE_H

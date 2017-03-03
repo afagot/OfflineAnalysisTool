@@ -45,7 +45,7 @@ int RandomPivot(int first,int last){        //Return a random element index in r
 
 //*************************************************************************************
 
-int Partition(vector< pair<int,float> >& A, int f, int l, string option){
+int Partition(Cluster& A, int f, int l, string option){
     pair<int,float> tPair;                  //Temporary pair to help swaping elements.
 
     int p = RandomPivot(f,l);               //Pick a random element as pivot and then
@@ -77,7 +77,7 @@ int Partition(vector< pair<int,float> >& A, int f, int l, string option){
 
 //*************************************************************************************
 
-void SortEvent(vector< pair<int,float> >& A, int f, int l, string option){
+void SortEvent(Cluster& A, int f, int l, string option){
     if(f < l){
         int pivot = Partition(A,f,l,option);//Partition your array and get the pivot.
         if(A.size() > 2){
@@ -152,9 +152,11 @@ void SortData(string fName){
                     float time = -1;
 
                         rawFile >> strip >> time;       //Save data pairs into the array.
-                    if(strip < 8)
+                    if(strip < 8){
+                        //if(strip != 0) XData.push_back(make_pair(strip,time));
                         XData.push_back(make_pair(strip,time));
-                    else if(strip < 16)
+                    } else if(strip < 16)
+                        //if(strip != 14) YData.push_back(make_pair(strip,time));
                         YData.push_back(make_pair(strip,time));
                 }
 

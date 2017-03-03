@@ -13,9 +13,9 @@
 using namespace std;
 
 int main(int argc, char* argv[]){
-    if(argc != 2 && argc != 5){
+    if(argc != 2 && argc != 4){
         cout<<"USAGE : "<< argv[0] <<" <filename>\n";
-        cout<<"OR :    "<< argv[0] <<" <filename> <triggerwidth> <muonpeakstart> <muonpeakend>\n";
+        cout<<"OR :    "<< argv[0] <<" <filename> <muonpeakstart> <muonpeakend>\n";
         return 1;
     } else {
         string fName;
@@ -29,13 +29,12 @@ int main(int argc, char* argv[]){
         SortData(fName);
 
         //Clusterize data files and make histograms
-        if(argc == 2) Analyse(fName, 1000, 0, 1000);
+        if(argc == 2) Analyse(fName, 0, 1000);
         else{
-            float window = strtof(argv[2],NULL);
-            float start  = strtof(argv[3],NULL);
-            float end    = strtof(argv[4],NULL);
+            float start  = strtof(argv[2],NULL);
+            float end    = strtof(argv[3],NULL);
 
-            Analyse(fName, window, start, end);
+            Analyse(fName, start, end);
         }
         return 0;
     }

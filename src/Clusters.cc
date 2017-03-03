@@ -10,6 +10,7 @@
 #include "../include/utils.h"
 
 #include "TFile.h"
+#include "TTree.h"
 #include "TH1S.h"
 #include "TH2S.h"
 #include "TH1F.h"
@@ -50,7 +51,7 @@ void AddCluster2List(Cluster& cluster, ClusterList& cList){
 
 void PrintClusters(int event, ClusterList& cList, ostream& output){
     if(cList.size() == 1 && cList[0].size() == 0)
-        MSG_WARNING("Skipped empty cluster\n");
+        return;
     else{
         output << event << " " << cList.size() <<endl;
         for(unsigned int c = 0; c < cList.size(); c++){
@@ -66,10 +67,13 @@ void PrintClusters(int event, ClusterList& cList, ostream& output){
 //Function that returns if the hit is part of the cluster.
 
 bool IsInCluster(int hit, Cluster cluster, string option){
-    if(option == "TIME")                                                            //Time condition for cluters :
-        return hit-cluster.front().second < 10.0;                                   //10 ns wide (unit = 100 ps).
-    else if(option == "STRIP")                                                      //Strip condition for clusters :
-        return hit-cluster.back().first == 1;                                       //neighbor strips.
+    //Time clustering consition : 10ns
+    if(option == "TIME")
+        return hit-cluster.front().second < 10.0;
+
+    //Strip clustering condition : adjacent strips
+    else if(option == "STRIP")
+        return hit-cluster.back().first == 1;
 
     return false;
 }
@@ -107,12 +111,15 @@ void GroupStrips(Cluster& tCluster, Cluster& sCluster, ClusterList& cList){
 //X and Y clusters into 1.
 
 float GetClusterStart(Cluster& cluster){
-    //First sort back the cluster by time (indeed the cluster was
-    //formed by sorting by strips)
-    if(cluster.size() > 1) SortEvent(cluster,0,cluster.size()-1,"TIME");
+    if(cluster.size() > 0){
+        //First sort back the cluster by time (indeed the cluster was
+        //formed by sorting by strips)
+        if(cluster.size() > 1) SortEvent(cluster,0,cluster.size()-1,"TIME");
 
-    //return the time of the first hit in the cluster
-    return cluster.front().second;
+        //return the time of the first hit in the cluster
+        return cluster.front().second;
+    } else
+        return 0.;
 }
 
 //*****************************************************************************
@@ -135,12 +142,14 @@ bool Is2DCluster(Cluster clusterX, Cluster clusterY){
 float Get1DClusterCenter(Cluster cluster){
     float center = 0.;
 
-    //Sum all the strip numbers in the cluster
-    for(unsigned int i; i<cluster.size(); i++)
-        center += cluster[i].first;
+    if(cluster.size() > 0){
+        //Sum all the strip numbers in the cluster
+        for(unsigned int i; i<cluster.size(); i++)
+            center += cluster[i].first;
 
-    //divide by the cluster size
-    center = center/cluster.size();
+        //divide by the cluster size
+        center = center/cluster.size();
+    }
 
     return center;
 }
@@ -150,7 +159,9 @@ float Get1DClusterCenter(Cluster cluster){
 //in each event to make a new outputfile the the hits grouped as clusters in
 //each event.
 
-void Analyse(string fName, float window, float start, float end){
+void Analyse(string fName, float start, float end){
+    float window = end - start;
+
     //Open inputfile
     unsigned NameInPath = fName.find_last_of("/")+1;
     string dName = fName.insert(NameInPath,"DAT/SORTED_");
@@ -182,6 +193,43 @@ void Analyse(string fName, float window, float start, float end){
         string fNameROOT = pathName + "ROOT/ROOT_" + outputName + ".root";
         TFile ResultROOT(fNameROOT.c_str(),"RECREATE");
 
+        //************************ DATA TREE *************************
+
+        //Create the data tree where the data will be saved
+        //For each entry will be saved the event tag, the number of hits recorded
+        //in the TDCs, the list of fired TDC channels and the time stamps of the
+        //hits.
+        TTree* RAWDataTree = new TTree("RAWData","RAWData");
+
+        int    EventCount = -9;  //Event tag
+        int    nHits = -8;       //Number of fired X TDC channels in event
+        eStrips TDCCh;            //List of fired X TDC channels in event
+        eTimes  TDCTS;            //list of fired X TDC channels time stamps
+
+        TDCCh.clear();
+        TDCTS.clear();
+
+        //Set the branches that will contain the previously defined variables
+        RAWDataTree->Branch("EventNumber",    &EventCount,  "EventNumber/I");
+        RAWDataTree->Branch("number_of_hits", &nHits,       "number_of_hits/I");
+        RAWDataTree->Branch("TDC_channel",    &TDCCh);
+        RAWDataTree->Branch("TDC_TimeStamp",  &TDCTS);
+
+        //Cleaning all the vectors that will contain the data
+        RAWData TDCData;
+
+        //Initialisation of the RAWData vectors
+        TDCData.EventList = new Events;
+        TDCData.NHitsList = new hMult;
+        TDCData.ChannelList = new esList;
+        TDCData.TimeStampList = new etList;
+
+        //Cleaning all the vectors
+        TDCData.EventList->clear();
+        TDCData.NHitsList->clear();
+        TDCData.ChannelList->clear();
+        TDCData.TimeStampList->clear();
+
         //*********************** HISTOGRAMS *************************
 
         //************ STRIPS
@@ -196,11 +244,11 @@ void Analyse(string fName, float window, float start, float end){
         StripProfileY->SetYTitle("# of events");
 
         //Time Profiles
-        TH1F* TimeProfileX = new TH1F("TimeProfileX","Arrival time profile of X hits",window/10,0,window);
+        TH1F* TimeProfileX = new TH1F("TimeProfileX","Arrival time profile of X hits",window/10,start,end);
         TimeProfileX->SetXTitle("Time [ns]");
         TimeProfileX->SetYTitle("# of events");
 
-        TH1F* TimeProfileY = new TH1F("TimeProfileY","Arrival time profile of Y hits",window/10,0,window);
+        TH1F* TimeProfileY = new TH1F("TimeProfileY","Arrival time profile of Y hits",window/10,start,end);
         TimeProfileY->SetXTitle("Time [ns]");
         TimeProfileY->SetYTitle("# of events");
 
@@ -230,17 +278,31 @@ void Analyse(string fName, float window, float start, float end){
         ClusterProfileXY->SetZTitle("# of events");
 
         //Time Profile
-        TH1F* ClusterTimeX = new TH1F("ClusterTimeX","Arrival time profile of X clusters",window/10,0,window);
+        TH1F* ClusterTimeX = new TH1F("ClusterTimeX","Arrival time profile of X clusters",window/10,start,end);
         ClusterTimeX->SetXTitle("Time [ns]");
         ClusterTimeX->SetYTitle("# of events");
 
-        TH1F* ClusterTimeY = new TH1F("ClusterTimeY","Arrival time profile of Y clusters",window/10,0,window);
+        TH1F* ClusterTimeY = new TH1F("ClusterTimeY","Arrival time profile of Y clusters",window/10,start,end);
         ClusterTimeY->SetXTitle("Time [ns]");
         ClusterTimeY->SetYTitle("# of events");
 
-        TH1F* ClusterTimeXY = new TH1F("ClusterTimeXY","Arrival time profile of XY clusters",window/10,0,window);
-        ClusterTimeXY->SetXTitle("Time [ns]");
-        ClusterTimeXY->SetYTitle("# of events");
+        TH2F* ClusterTimeXY = new TH2F("ClusterTimeXY","Arrival time profile of XY clusters",window/10,start,end,window/10,start,end);
+        ClusterTimeXY->SetXTitle("Time X [ns]");
+        ClusterTimeXY->SetYTitle("Time Y [ns]");
+        ClusterTimeXY->SetZTitle("# of events");
+
+        //Time difference between first and last hit in the cluster
+        TH1F* ClusterDiffX = new TH1F("ClusterDiffX","Time spread of X clusters",50,0,50);
+        ClusterDiffX->SetXTitle("Time [ns]");
+        ClusterDiffX->SetYTitle("# of events");
+
+        TH1F* ClusterDiffY = new TH1F("ClusterDiffY","ime spread of Y clusters",50,0,50);
+        ClusterDiffY->SetXTitle("Time [ns]");
+        ClusterDiffY->SetYTitle("# of events");
+
+        TH1F* ClusterDiffXY = new TH1F("ClusterDiffXY","ime spread of 2D clusters",50,0,50);
+        ClusterDiffXY->SetXTitle("Time [ns]");
+        ClusterDiffXY->SetYTitle("# of events");
 
         //Multiplicities
         TH1S* ClusterMultiplicityX = new TH1S("ClusterMultiplicityX","Cluster multiplicity of X clusters",11,-0.5,10.5);
@@ -254,6 +316,17 @@ void Analyse(string fName, float window, float start, float end){
         TH1S* ClusterMultiplicityXY = new TH1S("ClusterMultiplicityXY","Cluster multiplicity of XY clusters",11,-0.5,10.5);
         ClusterMultiplicityXY->SetXTitle("Multiplicity");
         ClusterMultiplicityXY->SetYTitle("# of events");
+
+        //Multiplicity vs 1D cluster position
+        TH2S* ClusterMultPosX = new TH2S("ClusterMultPosX","Cluster multiplicity vs position of X clusters",11,-0.5,10.5,15,-0.25,7.25);
+        ClusterMultPosX->SetXTitle("Multiplicity");
+        ClusterMultPosX->SetYTitle("Strip");
+        ClusterMultPosX->SetZTitle("# of events");
+
+        TH2S* ClusterMultPosY = new TH2S("ClusterMultPosY","Cluster multiplicity vs position of Y clusters",11,-0.5,10.5,15,7.75,15.25);
+        ClusterMultPosY->SetXTitle("Multiplicity");
+        ClusterMultPosY->SetYTitle("Strip");
+        ClusterMultPosY->SetZTitle("# of events");
 
         //Cluster Sizes
         TH1S* ClusterSizeX = new TH1S("ClusterSizeX","Size of X cluster",8,0.5,8.5);
@@ -298,6 +371,17 @@ void Analyse(string fName, float window, float start, float end){
             if(nEvent == -1 && nHitsX == -1 && nHitsY == -1){
                 MSG_INFO("End of clusterization.\n");
             } else {
+                //Fill the RAWData vectors:
+                TDCData.EventList->push_back(nEvent);
+                TDCData.NHitsList->push_back(nHitsX+nHitsY);
+
+                //Create objects to contain the full list of hits and
+                //time stamps to push into the TDCData
+                eStrips tmpStrips;
+                eTimes tmpTimes;
+                tmpStrips.clear();
+                tmpTimes.clear();
+
                 //Fill hit multiplicity histograms
                 HitMultiplicityX->Fill(nHitsX);
                 HitMultiplicityY->Fill(nHitsY);
@@ -307,6 +391,7 @@ void Analyse(string fName, float window, float start, float end){
                 TimeCluster.clear();
                 StripCluster.clear();
 
+                //First, loop over X readout hits
                 if(nHitsX > 0){
                     for(int h = 0; h < nHitsX; h++){
                         int strip = -1;
@@ -320,42 +405,52 @@ void Analyse(string fName, float window, float start, float end){
                             MSG_ERROR("Problem with the X event : %d\n",nEvent);
                             return;
                         } else {
-                            //Fill the hit and time profile histograms
-                            StripProfileX->Fill(strip);
-                            TimeProfileX->Fill(time);
+                            //Fill the strips and time stamps for TDCData
+                            tmpStrips.push_back(strip);
+                            tmpTimes.push_back(time);
 
-                            //build clusters
-                            if(TimeCluster.size() > 0){
-                                if(IsInCluster(time,TimeCluster,"TIME")){
-                                    TimeCluster.push_back(make_pair(strip,time));
+                            if(time >= start && time <= end){
+                                //Fill the hit and time profile histograms
+                                StripProfileX->Fill(strip);
+                                TimeProfileX->Fill(time);
+
+                                //build clusters
+
+                                //If the size if bigger than 0, the time
+                                //cluster has already started to be filled
+                                //Else that means that the current hit is
+                                //the first one in the time cluster and is
+                                //added into the cluster
+                                if(TimeCluster.size() > 0){
+                                    //Resort the cluster
+                                    if(TimeCluster.size() > 1) SortEvent(TimeCluster,0,TimeCluster.size()-1,"TIME");
+                                    //Check if next hit is in time cluster
+                                    //else sort hits by strip number and
+                                    //group hits together into 1D clusters
+                                    if(IsInCluster(time,TimeCluster,"TIME")){
+                                        TimeCluster.push_back(make_pair(strip,time));
+                                    } else {
+                                        GroupStrips(TimeCluster,StripCluster,ClusterListX);
+                                        TimeCluster.clear();
+                                        TimeCluster.push_back(make_pair(strip,time));
+                                    }
                                 } else {
-                                    GroupStrips(TimeCluster,StripCluster,ClusterListX);
-                                    TimeCluster.clear();
                                     TimeCluster.push_back(make_pair(strip,time));
                                 }
-                            } else {
-                                TimeCluster.push_back(make_pair(strip,time));
                             }
                         }
                     }
+                    //When the code exits the loop, sort the hits of the
+                    //very last time cluster by strip number and group
+                    //hits into 1D clusters
                     GroupStrips(TimeCluster,StripCluster,ClusterListX);
                     TimeCluster.clear();
                 }
+                //Finally, print the clusters into a dat file to keep
+                //track of the data
                 PrintClusters(nEvent,ClusterListX,output);
                 TimeCluster.clear();
                 StripCluster.clear();
-
-                //Fill the 1D cluster histograms
-                ClusterMultiplicityX->Fill(ClusterListX.size());
-                for(unsigned int c = 0; c < ClusterListX.size(); c++){
-                    float center = Get1DClusterCenter(ClusterListX[c]);
-                    ClusterProfileX->Fill(center);
-
-                    float time = GetClusterStart(ClusterListX[c]);
-                    ClusterTimeX->Fill(time);
-
-                    ClusterSizeX->Fill(ClusterListX[c].size());
-                }
 
                 //Repeat the same for the Y array data
                 if(nHitsY > 0){
@@ -372,21 +467,28 @@ void Analyse(string fName, float window, float start, float end){
                             cout << nEvent << endl;
                             return;
                         } else {
-                            //Fill the hit and time profile histograms
-                            StripProfileY->Fill(strip);
-                            TimeProfileY->Fill(time);
+                            //Fill the strips and time stamps for TDCData
+                            tmpStrips.push_back(strip);
+                            tmpTimes.push_back(time);
 
-                            //build clusters
-                            if(TimeCluster.size() > 0){
-                                if(IsInCluster(time,TimeCluster,"TIME")){
-                                    TimeCluster.push_back(make_pair(strip,time));
+                            if(time >= start && time <= end){
+                                //Fill the hit and time profile histograms
+                                StripProfileY->Fill(strip);
+                                TimeProfileY->Fill(time);
+
+                                //build clusters
+                                if(TimeCluster.size() > 0){
+                                    if(TimeCluster.size() > 1) SortEvent(TimeCluster,0,TimeCluster.size()-1,"TIME");
+                                    if(IsInCluster(time,TimeCluster,"TIME")){
+                                        TimeCluster.push_back(make_pair(strip,time));
+                                    } else {
+                                        GroupStrips(TimeCluster,StripCluster,ClusterListY);
+                                        TimeCluster.clear();
+                                        TimeCluster.push_back(make_pair(strip,time));
+                                    }
                                 } else {
-                                    GroupStrips(TimeCluster,StripCluster,ClusterListY);
-                                    TimeCluster.clear();
                                     TimeCluster.push_back(make_pair(strip,time));
                                 }
-                            } else {
-                                TimeCluster.push_back(make_pair(strip,time));
                             }
                         }
                     }
@@ -397,16 +499,48 @@ void Analyse(string fName, float window, float start, float end){
                 TimeCluster.clear();
                 StripCluster.clear();
 
-                //Fill the 1D cluster histograms
+                //Fill the 1D cluster multiplicity histograms
+                ClusterMultiplicityX->Fill(ClusterListX.size());
                 ClusterMultiplicityY->Fill(ClusterListY.size());
-                for(unsigned int c = 0; c < ClusterListY.size(); c++){
-                    float center = Get1DClusterCenter(ClusterListY[c]);
-                    ClusterProfileY->Fill(center);
 
-                    float time = GetClusterStart(ClusterListY[c]);
-                    ClusterTimeY->Fill(time);
+                //For each 1D cluster on X readout
+                for(unsigned int x = 0; x<ClusterListX.size(); x++){
+                    //Fill the 1D cluster histograms
+                    //of X readout
+                    float xCenter = Get1DClusterCenter(ClusterListX[x]);
+                    ClusterProfileX->Fill(xCenter);
+                    ClusterMultPosX->Fill(ClusterListX.size(),xCenter);
 
-                    ClusterSizeY->Fill(ClusterListY[c].size());
+                    float xTime = GetClusterStart(ClusterListX[x]);
+                    ClusterTimeX->Fill(xTime);
+
+                    ClusterSizeX->Fill(ClusterListX[x].size());
+
+                    //Get the time spread of the cluster
+                    if(ClusterListX[x].size() > 1 && ClusterListX[x].size() < 5){
+                        float lastXstamp = ClusterListX[x].back().second;
+                        ClusterDiffX->Fill(lastXstamp-xTime);
+                    }
+                }
+
+                //For each 1D cluster on Y readout
+                for(unsigned int y = 0; y<ClusterListY.size(); y++){
+                    //Fill the 1D cluster histograms
+                    //of Y readout
+                    float yCenter = Get1DClusterCenter(ClusterListY[y]);
+                    ClusterProfileY->Fill(yCenter);
+                    ClusterMultPosY->Fill(ClusterListY.size(),yCenter);
+
+                    float yTime = GetClusterStart(ClusterListY[y]);
+                    ClusterTimeY->Fill(yTime);
+
+                    ClusterSizeY->Fill(ClusterListY[y].size());
+
+                    //Get the time spread of the cluster
+                    if(ClusterListY[y].size() > 1 && ClusterListY[y].size() < 5){
+                        float lastYstamp = ClusterListY[y].back().second;
+                        ClusterDiffY->Fill(lastYstamp-yTime);
+                    }
                 }
 
                 //Loop over clusters and build 2D clusters
@@ -427,7 +561,7 @@ void Analyse(string fName, float window, float start, float end){
                                 //as time stamp of the 2D cluster
                                 float xTime = GetClusterStart(ClusterListX[x]);
                                 float yTime = GetClusterStart(ClusterListY[y]);
-                                ClusterTimeXY->Fill(fmax(xTime,yTime));
+                                ClusterTimeXY->Fill(xTime,yTime);
 
                                 //Use a temporary cluster to fill the 2D
                                 //cluster list
@@ -445,7 +579,26 @@ void Analyse(string fName, float window, float start, float end){
                     //Fill the multiplicity of 2D clusters defined as the
                     //number of 2D clusters
                     ClusterMultiplicityXY->Fill(ClusterListXY.size());
+
+                    for(unsigned int xy = 0; xy < ClusterListXY.size();xy++){
+                        if(ClusterListXY[xy].size()>1 && ClusterListXY[xy].size()<5){
+                            float xyTime = GetClusterStart(ClusterListXY[xy]);
+                            float lastXYstamp = ClusterListXY[xy].back().second;
+                            ClusterDiffXY->Fill(lastXYstamp-xyTime);
+                        }
+                    }
+                } else {
+                    ClusterMultiplicityXY->Fill(0.);
                 }
+
+                //The detector is defined as efficient is there was at least
+                //1 2D cluster
+                if(ClusterListXY.size() > 0 && ClusterListXY.size() < 3) Efficiency->Fill(1);
+                else Efficiency->Fill(0);
+
+                //Push the list of strips and time stamps into TDCData
+                TDCData.ChannelList->push_back(tmpStrips);
+                TDCData.TimeStampList->push_back(tmpTimes);
             }
         }
 
@@ -463,14 +616,30 @@ void Analyse(string fName, float window, float start, float end){
         ClusterTimeX->Write();
         ClusterTimeY->Write();
         ClusterTimeXY->Write();
+        ClusterDiffX->Write();
+        ClusterDiffY->Write();
+        ClusterDiffXY->Write();
         ClusterMultiplicityX->Write();
         ClusterMultiplicityY->Write();
         ClusterMultiplicityXY->Write();
+        ClusterMultPosX->Write();
+        ClusterMultPosY->Write();
         ClusterSizeX->Write();
         ClusterSizeY->Write();
         ClusterSizeXY->Write();
 
         Efficiency->Write();
+
+        //Write the data from the RAWData structure to the TTree
+        for(unsigned int i=0; i<TDCData.EventList->size(); i++){
+            EventCount  = TDCData.EventList->at(i);
+            nHits       = TDCData.NHitsList->at(i);
+            TDCCh       = TDCData.ChannelList->at(i);
+            TDCTS       = TDCData.TimeStampList->at(i);
+
+            RAWDataTree->Fill();
+        }
+        RAWDataTree->Write();
 
         //Close the files
         ResultROOT.Close();

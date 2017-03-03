@@ -18,8 +18,21 @@
 
 using namespace std;
 
-typedef std::vector< std::pair<int,float> > Cluster;
-typedef std::vector< Cluster > ClusterList;
+typedef vector<int> Events;                 //List of event tags
+typedef vector<int> hMult;                  //List of TDC hit multiplicity
+typedef vector<int> eStrips;                //List of fired strips per event
+typedef vector<float> eTimes;               //List of hit time stamps per event
+typedef vector<eStrips> esList;             //List of eStrip
+typedef vector<eTimes> etList;              //List of eTime
+typedef vector< pair<int,float> > Cluster;  //List of strip + time stamps grouped as cluster
+typedef vector<Cluster> ClusterList;        //List of clusters
+
+struct RAWData{
+    Events* EventList;
+    hMult*  NHitsList;
+    esList* ChannelList;
+    etList* TimeStampList;
+};
 
 void  AddCluster2List(Cluster& cluster, ClusterList& cList);
 void  PrintClusters(int event, ClusterList& cList, ostream& output);
@@ -28,6 +41,6 @@ void  GroupStrips(Cluster &tCluster, Cluster& sCluster, ClusterList& cList);
 float GetClusterStart(Cluster& cluster);
 bool  Is2DCluster(Cluster clusterX, Cluster clusterY);
 float Get1DClusterCenter(Cluster cluster);
-void  Analyse(string fName, float window, float start, float end);
+void  Analyse(string fName, float start, float end);
 
 #endif // CLUSTERS_H

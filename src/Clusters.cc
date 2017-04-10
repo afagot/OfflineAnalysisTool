@@ -164,7 +164,7 @@ void Analyse(string fName, float start, float end){
 
     //Open inputfile
     unsigned NameInPath = fName.find_last_of("/")+1;
-    string dName = fName.insert(NameInPath,"DAT/SORTED_");
+    string dName = fName.insert(NameInPath,"SORTED_");
     ifstream input(dName.c_str(),ios::in);
 
     if(input.is_open()){
@@ -173,7 +173,7 @@ void Analyse(string fName, float start, float end){
         //******************** CLUSTERIZED FILE **********************
 
         fName.erase(NameInPath,11);
-        fName.insert(NameInPath,"DAT/CLUSTERIZED_");
+        fName.insert(NameInPath,"CLUSTERIZED_");
         ofstream output(fName.c_str(),ios::out);
 
         //******************** CSV OUTPUT FILE ***********************
@@ -185,12 +185,12 @@ void Analyse(string fName, float start, float end){
         string pathName = fName.substr(0,fName.find_last_of("/")+1);
         string outputName = fName.substr(fName.find_first_of("_")+1);
 
-        string ResultName = pathName + "CSV/RESULT_" + outputName + ".csv";
+        string ResultName = pathName + "RESULT_" + outputName + ".csv";
         ofstream ResultFile(ResultName.c_str(),ios::out);
 
         //******************** ROOT OUTPUT FILE **********************
 
-        string fNameROOT = pathName + "ROOT/ROOT_" + outputName + ".root";
+        string fNameROOT = pathName + "ROOT_" + outputName + ".root";
         TFile ResultROOT(fNameROOT.c_str(),"RECREATE");
 
         //************************ DATA TREE *************************
@@ -645,6 +645,7 @@ void Analyse(string fName, float start, float end){
         ResultROOT.Close();
         ResultFile.close();
         output.close();
+        MSG_INFO("Data analysis done.\n");
     } else {
         MSG_ERROR("Couldn't open data file to clusterize.\n");
         return;

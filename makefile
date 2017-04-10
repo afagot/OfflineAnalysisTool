@@ -32,7 +32,7 @@ analysis: main.o Clusters.o SortDataFile.o utils.o
 	$(DAQ_OBJ_DIR)/utils.o \
         -o $(DAQ_BIN_DIR)/analysis \
         $(LFLAGS)  \
-        -l CAENVME -l curses
+        -l curses
 
 main.o:
 	$(CC) $(CFLAGS) -c $(DAQ_SRC_DIR)/main.cc -o $(DAQ_OBJ_DIR)/main.o

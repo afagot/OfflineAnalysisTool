@@ -178,6 +178,7 @@ void SortData(string fName){
             }
         }
         sortedFile.close();
+        MSG_INFO("Data sorting finished.\n");
     } else {
         MSG_ERROR("Couldn't open data file to sort.\n");
         return;

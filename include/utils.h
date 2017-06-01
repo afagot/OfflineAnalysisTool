@@ -19,6 +19,7 @@ using namespace std;
 string          intToString(int value);
 string          longTostring(long value);
 string          floatTostring(float value);
+string          GetVoltage(string fName);
 void            SetTitleName(string rpcID, unsigned int partition, char* Name, char* Title, string Namebase, string Titlebase);
 float           GetTH1Mean(TH1* H);
 float           GetTH1StdDev(TH1* H);

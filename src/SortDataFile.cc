@@ -118,6 +118,8 @@ void SortEvent(Cluster& A, int f, int l, string option){
 //with a line of 0s in between each event (trigger).
 
 void SortData(string fName, int nStrips){
+    string HVstep = GetVoltage(fName)+"V_";              //Extract voltage step from file header.
+
     ifstream rawFile(fName.c_str(),ios::in);            //Open data file in read mode.
 
     if(rawFile.is_open()){
@@ -133,7 +135,8 @@ void SortData(string fName, int nStrips){
         YData.clear();                                  //each event in Y readout.
 
         unsigned NameInPath = fName.find_last_of("/")+1;
-        string oName = fName.insert(NameInPath,"SORTED_");
+        string oName = fName.insert(NameInPath,HVstep);
+        oName = oName.insert(NameInPath,"SORTED_");
         ofstream sortedFile(oName.c_str(), ios::out);   //Open output file in write mode.
 
         while(rawFile.good()){

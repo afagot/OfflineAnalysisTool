@@ -63,6 +63,29 @@ string floatTostring(float value){
 }
 
 // ****************************************************************************************************
+// *    string GetVoltage(string fName)
+//
+//  Function that returns the voltage of the current HV step
+// ****************************************************************************************************
+
+string GetVoltage(string fName){
+    ifstream file(fName.c_str(), ios::in);
+
+    string HV;
+    string word;
+
+    //There are 5 words per line in the data file header:
+    // # Step X of N
+    // # Voltage = YYYY V
+    // We thus want to extract the word YYYY which is the 9th one
+
+    for(unsigned int w = 0; w < 8; w++) file >> word;
+    file >> HV;
+
+    return HV;
+}
+
+// ****************************************************************************************************
 // *    void SetTitleName(string rpcID, unsigned int partition, char* Name, char* Title,
 // *                      string Namebase, string Titlebase)
 //

@@ -162,9 +162,12 @@ float Get1DClusterCenter(Cluster cluster){
 void Analyse(string fName, int nStrips, float start, float end){
     float window = end - start;
 
+    string HVstep = GetVoltage(fName);
+    string prefix = "SORTED_" + HVstep + "V_";
+
     //Open inputfile
     unsigned NameInPath = fName.find_last_of("/")+1;
-    string dName = fName.insert(NameInPath,"SORTED_");
+    string dName = fName.insert(NameInPath,prefix);
     ifstream input(dName.c_str(),ios::in);
 
     if(input.is_open()){
@@ -172,18 +175,17 @@ void Analyse(string fName, int nStrips, float start, float end){
 
         //******************** CLUSTERIZED FILE **********************
 
-        fName.erase(NameInPath,11);
-        fName.insert(NameInPath,"CLUSTERIZED_");
-        ofstream output(fName.c_str(),ios::out);
+        dName.erase(NameInPath,7);
+        dName.insert(NameInPath,"CLUSTERIZED_");
+        ofstream output(dName.c_str(),ios::out);
 
         //******************** CSV OUTPUT FILE ***********************
 
-        fName.erase(NameInPath,16);
-        if ( fName.substr(fName.find_last_of(".")) == ".dat" )
-            fName.erase(fName.find_last_of("."));
+        if ( dName.substr(dName.find_last_of(".")) == ".dat" )
+            dName.erase(dName.find_last_of("."));
 
-        string pathName = fName.substr(0,fName.find_last_of("/")+1);
-        string outputName = fName.substr(fName.find_first_of("_")+1);
+        string pathName = dName.substr(0,dName.find_last_of("/")+1);
+        string outputName = dName.substr(dName.find_first_of("_")+1);
 
         string ResultName = pathName + "RESULT_" + outputName + ".csv";
         ofstream ResultFile(ResultName.c_str(),ios::out);
@@ -601,6 +603,9 @@ void Analyse(string fName, int nStrips, float start, float end){
                 TDCData.TimeStampList->push_back(tmpTimes);
             }
         }
+
+        //Write efficiency results in CSV file
+        ResultFile << HVstep << '\t' << Efficiency->GetMean() << '\t' << Efficiency->GetStdDev() << endl;
 
         //Write all histograms into the ROOT file
         StripProfileX->Write();

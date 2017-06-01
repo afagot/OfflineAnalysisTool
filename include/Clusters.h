@@ -41,6 +41,6 @@ void  GroupStrips(Cluster &tCluster, Cluster& sCluster, ClusterList& cList);
 float GetClusterStart(Cluster& cluster);
 bool  Is2DCluster(Cluster clusterX, Cluster clusterY);
 float Get1DClusterCenter(Cluster cluster);
-void  Analyse(string fName, float start, float end);
+void  Analyse(string fName, int nStrips, float start, float end);
 
 #endif // CLUSTERS_H

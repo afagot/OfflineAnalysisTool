@@ -159,7 +159,7 @@ float Get1DClusterCenter(Cluster cluster){
 //in each event to make a new outputfile the the hits grouped as clusters in
 //each event.
 
-void Analyse(string fName, float start, float end){
+void Analyse(string fName, int nStrips, float start, float end){
     float window = end - start;
 
     //Open inputfile
@@ -235,11 +235,11 @@ void Analyse(string fName, float start, float end){
         //************ STRIPS
 
         //Hit Profiles
-        TH1S* StripProfileX = new TH1S("StripProfileX","X Strip profile",8,-0.5,7.5);
+        TH1S* StripProfileX = new TH1S("StripProfileX","X Strip profile",nStrips,-0.5,nStrips-0.5);
         StripProfileX->SetXTitle("Strip");
         StripProfileX->SetYTitle("# of events");
 
-        TH1S* StripProfileY = new TH1S("StripProfileY","Y Strip profile",8,7.5,15.5);
+        TH1S* StripProfileY = new TH1S("StripProfileY","Y Strip profile",nStrips,nStrips-0.5,2*nStrips-0.5);
         StripProfileY->SetXTitle("Strip");
         StripProfileY->SetYTitle("# of events");
 
@@ -253,26 +253,26 @@ void Analyse(string fName, float start, float end){
         TimeProfileY->SetYTitle("# of events");
 
         //Multiplicities
-        TH1S* HitMultiplicityX = new TH1S("HitMultiplicityX","Hit multiplicity of X hits",11,-0.5,10.5);
+        TH1S* HitMultiplicityX = new TH1S("HitMultiplicityX","Hit multiplicity of X hits",2*nStrips+1,-0.5,2*nStrips+0.5);
         HitMultiplicityX->SetXTitle("Multiplicity");
         HitMultiplicityX->SetYTitle("# of events");
 
-        TH1S* HitMultiplicityY = new TH1S("HitMultiplicityY","Hit multiplicity of Y hits",11,-0.5,10.5);
+        TH1S* HitMultiplicityY = new TH1S("HitMultiplicityY","Hit multiplicity of Y hits",2*nStrips+1,-0.5,2*nStrips+0.5);
         HitMultiplicityY->SetXTitle("Multiplicity");
         HitMultiplicityY->SetYTitle("# of events");
 
         //************ CLUSTERS
 
         //Cluster Profiles
-        TH1S* ClusterProfileX = new TH1S("ClusterProfileX","X Cluster profile",15,-0.25,7.25);
+        TH1S* ClusterProfileX = new TH1S("ClusterProfileX","X Cluster profile",2*nStrips,-0.25,nStrips-0.75);
         ClusterProfileX->SetXTitle("Strip");
         ClusterProfileX->SetYTitle("# of events");
 
-        TH1S* ClusterProfileY = new TH1S("ClusterProfileY","Y Cluster profile",15,7.75,15.25);
+        TH1S* ClusterProfileY = new TH1S("ClusterProfileY","Y Cluster profile",2*nStrips,nStrips-0.25,2*nStrips-0.75);
         ClusterProfileY->SetXTitle("Strip");
         ClusterProfileY->SetYTitle("# of events");
 
-        TH2S* ClusterProfileXY = new TH2S("ClusterProfileXY","XY Cluster profile",15,-0.25,7.25,15,7.75,15.25);
+        TH2S* ClusterProfileXY = new TH2S("ClusterProfileXY","XY Cluster profile",2*nStrips,-0.25,nStrips-0.75,2*nStrips,nStrips-0.25,2*nStrips-0.75);
         ClusterProfileXY->SetXTitle("Strip X");
         ClusterProfileXY->SetYTitle("Strip Y");
         ClusterProfileXY->SetZTitle("# of events");
@@ -296,48 +296,48 @@ void Analyse(string fName, float start, float end){
         ClusterDiffX->SetXTitle("Time [ns]");
         ClusterDiffX->SetYTitle("# of events");
 
-        TH1F* ClusterDiffY = new TH1F("ClusterDiffY","ime spread of Y clusters",50,0,50);
+        TH1F* ClusterDiffY = new TH1F("ClusterDiffY","Time spread of Y clusters",50,0,50);
         ClusterDiffY->SetXTitle("Time [ns]");
         ClusterDiffY->SetYTitle("# of events");
 
-        TH1F* ClusterDiffXY = new TH1F("ClusterDiffXY","ime spread of 2D clusters",50,0,50);
+        TH1F* ClusterDiffXY = new TH1F("ClusterDiffXY","Time spread of 2D clusters",50,0,50);
         ClusterDiffXY->SetXTitle("Time [ns]");
         ClusterDiffXY->SetYTitle("# of events");
 
         //Multiplicities
-        TH1S* ClusterMultiplicityX = new TH1S("ClusterMultiplicityX","Cluster multiplicity of X clusters",11,-0.5,10.5);
+        TH1S* ClusterMultiplicityX = new TH1S("ClusterMultiplicityX","Cluster multiplicity of X clusters",2*nStrips+1,-0.5,2*nStrips+0.5);
         ClusterMultiplicityX->SetXTitle("Multiplicity");
         ClusterMultiplicityX->SetYTitle("# of events");
 
-        TH1S* ClusterMultiplicityY = new TH1S("ClusterMultiplicityY","Cluster multiplicity of Y clusters",11,-0.5,10.5);
+        TH1S* ClusterMultiplicityY = new TH1S("ClusterMultiplicityY","Cluster multiplicity of Y clusters",2*nStrips+1,-0.5,2*nStrips+0.5);
         ClusterMultiplicityY->SetXTitle("Multiplicity");
         ClusterMultiplicityY->SetYTitle("# of events");
 
-        TH1S* ClusterMultiplicityXY = new TH1S("ClusterMultiplicityXY","Cluster multiplicity of XY clusters",11,-0.5,10.5);
+        TH1S* ClusterMultiplicityXY = new TH1S("ClusterMultiplicityXY","Cluster multiplicity of XY clusters",2*nStrips+1,-0.5,2*nStrips+0.5);
         ClusterMultiplicityXY->SetXTitle("Multiplicity");
         ClusterMultiplicityXY->SetYTitle("# of events");
 
         //Multiplicity vs 1D cluster position
-        TH2S* ClusterMultPosX = new TH2S("ClusterMultPosX","Cluster multiplicity vs position of X clusters",11,-0.5,10.5,15,-0.25,7.25);
+        TH2S* ClusterMultPosX = new TH2S("ClusterMultPosX","Cluster multiplicity vs position of X clusters",2*nStrips+1,-0.5,2*nStrips+0.5,nStrips,-0.5,nStrips-0.5);
         ClusterMultPosX->SetXTitle("Multiplicity");
         ClusterMultPosX->SetYTitle("Strip");
         ClusterMultPosX->SetZTitle("# of events");
 
-        TH2S* ClusterMultPosY = new TH2S("ClusterMultPosY","Cluster multiplicity vs position of Y clusters",11,-0.5,10.5,15,7.75,15.25);
+        TH2S* ClusterMultPosY = new TH2S("ClusterMultPosY","Cluster multiplicity vs position of Y clusters",2*nStrips+1,-0.5,2*nStrips+0.5,nStrips,nStrips-0.5,2*nStrips-0.5);
         ClusterMultPosY->SetXTitle("Multiplicity");
         ClusterMultPosY->SetYTitle("Strip");
         ClusterMultPosY->SetZTitle("# of events");
 
         //Cluster Sizes
-        TH1S* ClusterSizeX = new TH1S("ClusterSizeX","Size of X cluster",8,0.5,8.5);
+        TH1S* ClusterSizeX = new TH1S("ClusterSizeX","Size of X cluster",nStrips,0.5,nStrips+0.5);
         ClusterSizeX->SetXTitle("Multiplicity");
         ClusterSizeX->SetYTitle("# of events");
 
-        TH1S* ClusterSizeY = new TH1S("ClusterSizeY","Size of Y cluster",8,0.5,8.5);
+        TH1S* ClusterSizeY = new TH1S("ClusterSizeY","Size of Y cluster",nStrips,0.5,nStrips+0.5);
         ClusterSizeY->SetXTitle("Multiplicity");
         ClusterSizeY->SetYTitle("# of events");
 
-        TH2S* ClusterSizeXY = new TH2S("ClusterSizeXY","Size of XY cluster",8,0.5,8.5,8,0.5,8.5);
+        TH2S* ClusterSizeXY = new TH2S("ClusterSizeXY","Size of XY cluster",nStrips,0.5,nStrips+0.5,nStrips,0.5,nStrips+0.5);
         ClusterSizeXY->SetXTitle("Multiplicity X");
         ClusterSizeXY->SetYTitle("Multiplicity Y");
         ClusterSizeXY->SetZTitle("# of events");
@@ -593,7 +593,7 @@ void Analyse(string fName, float start, float end){
 
                 //The detector is defined as efficient is there was at least
                 //1 2D cluster
-                if(ClusterListXY.size() > 0 && ClusterListXY.size() < 3) Efficiency->Fill(1);
+                if((ClusterListX.size() > 0 && ClusterListX.size() < 3) || (ClusterListY.size() > 0 && ClusterListY.size() < 3)) Efficiency->Fill(1);
                 else Efficiency->Fill(0);
 
                 //Push the list of strips and time stamps into TDCData

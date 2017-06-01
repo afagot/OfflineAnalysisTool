@@ -9,13 +9,8 @@ cp $1/*.dat .
 for dFile in *.dat
 do
 	echo $dFile
-	bin/analysis $dFile
+	bin/analysis $dFile $2 ${3-0} ${4-1000}
 done
-
-#for dFile in CLUSTERIZED*
-#do
-#	root -l -q 'make_histos.cc+("'$dFile'",'${2-1000}','${3-0}','${4-1000}')';
-#done
 
 mkdir -p $1/DAT/
 mkdir -p $1/CSV/

@@ -21,15 +21,15 @@ To compile the offline analysis project, simply do :
 
 There are 2 ways to use the executable file. Being in the previoulsly defined working directory, you can do :
 
-    ./OfflineAnalysis.sh [/path/to/datafile] [TriggerWindowWidth] [TimeEarliestSignals] [TimeLatestSignals]
+    ./OfflineAnalysis.sh [/path/to/datafile] [nStripsinXorY] [TriggerWindowWidth] [TimeEarliestSignals] [TimeLatestSignals]
 
 or simply
 
-    ./OfflineAnalysis.sh  [/path/to/datafile]
+    ./OfflineAnalysis.sh  [/path/to/datafile] [nStripsinXorY]
 
 then the default values for [TriggerWindowWidth], [TimeEarliestSignals] and [TimeLatestSignals] are 1000, 0 and 1000 but are not focussed on the cosmic muon peak. [TriggerWindowWidth] correspond to the value set in the DAQ software during the data acquisition. To have a good estimation of [TimeEarliestSignals] and [TimeLatestSignals], first do :
 
-    ./OfflineAnalysis.sh  [/path/to/datafile]
+    ./OfflineAnalysis.sh  [/path/to/datafile] [nStripsinXorY]
 
 then :
 
@@ -50,7 +50,7 @@ Finally, read the value of the first bin and last bin on the x-axis :
 
 Once you have all the needed values, you can do :
 
-    ./OfflineAnalysis.sh  [/path/to/datafile] [TriggerWindowWidth] [TimeEarliestSignals] [TimeLatestSignals]
+    ./OfflineAnalysis.sh  [/path/to/datafile] [nStripsinXorY] [TriggerWindowWidth] [TimeEarliestSignals] [TimeLatestSignals]
 
 And, in your datafile directory, print the efficiency and cluster size with :
 

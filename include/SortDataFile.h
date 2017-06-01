@@ -26,6 +26,6 @@ ifstream& GotoLine(ifstream &file, unsigned int line);
 int RandomPivot(int first,int last);
 int Partition(Cluster& A, int f, int l, string option);
 void SortEvent(Cluster& A, int f, int l, string option);
-void SortData(string fName);
+void SortData(string fName, int nStrips);
 
 #endif // SORTDATAFILE_H

@@ -117,7 +117,7 @@ void SortEvent(Cluster& A, int f, int l, string option){
 
 //with a line of 0s in between each event (trigger).
 
-void SortData(string fName){
+void SortData(string fName, int nStrips){
     ifstream rawFile(fName.c_str(),ios::in);            //Open data file in read mode.
 
     if(rawFile.is_open()){
@@ -133,7 +133,7 @@ void SortData(string fName){
         YData.clear();                                  //each event in Y readout.
 
         unsigned NameInPath = fName.find_last_of("/")+1;
-        string oName = fName.insert(NameInPath,"DAT/SORTED_");
+        string oName = fName.insert(NameInPath,"SORTED_");
         ofstream sortedFile(oName.c_str(), ios::out);   //Open output file in write mode.
 
         while(rawFile.good()){
@@ -152,10 +152,10 @@ void SortData(string fName){
                     float time = -1;
 
                         rawFile >> strip >> time;       //Save data pairs into the array.
-                    if(strip < 8){
+                    if(strip < nStrips){
                         //if(strip != 0) XData.push_back(make_pair(strip,time));
                         XData.push_back(make_pair(strip,time));
-                    } else if(strip < 16)
+                    } else if(strip < 2*nStrips)
                         //if(strip != 14) YData.push_back(make_pair(strip,time));
                         YData.push_back(make_pair(strip,time));
                 }

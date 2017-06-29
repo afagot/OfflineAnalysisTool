@@ -1,0 +1,8 @@
+bin/
+lib/
+obj/
+*.pcm
+*.dat
+CSV/
+DAT/
+ROOT

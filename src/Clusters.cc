@@ -69,7 +69,7 @@ void PrintClusters(int event, ClusterList& cList, ostream& output){
 bool IsInCluster(int hit, Cluster cluster, string option){
     //Time clustering consition : 10ns
     if(option == "TIME")
-        return hit-cluster.front().second < 10.0;
+        return hit-cluster.front().second < ClustDev;
 
     //Strip clustering condition : adjacent strips
     else if(option == "STRIP")
@@ -294,15 +294,15 @@ void Analyse(string fName, int nStrips, float start, float end){
         ClusterTimeXY->SetZTitle("# of events");
 
         //Time difference between first and last hit in the cluster
-        TH1F* ClusterDiffX = new TH1F("ClusterDiffX","Time spread of X clusters",50,0,50);
+        TH1F* ClusterDiffX = new TH1F("ClusterDiffX","Time spread of X clusters",(int)ClustDev,0,ClustDev);
         ClusterDiffX->SetXTitle("Time [ns]");
         ClusterDiffX->SetYTitle("# of events");
 
-        TH1F* ClusterDiffY = new TH1F("ClusterDiffY","Time spread of Y clusters",50,0,50);
+        TH1F* ClusterDiffY = new TH1F("ClusterDiffY","Time spread of Y clusters",(int)ClustDev,0,ClustDev);
         ClusterDiffY->SetXTitle("Time [ns]");
         ClusterDiffY->SetYTitle("# of events");
 
-        TH1F* ClusterDiffXY = new TH1F("ClusterDiffXY","Time spread of 2D clusters",50,0,50);
+        TH1F* ClusterDiffXY = new TH1F("ClusterDiffXY","Time spread of 2D clusters",(int)ClustDev,0,ClustDev);
         ClusterDiffXY->SetXTitle("Time [ns]");
         ClusterDiffXY->SetYTitle("# of events");
 
@@ -320,28 +320,61 @@ void Analyse(string fName, int nStrips, float start, float end){
         ClusterMultiplicityXY->SetYTitle("# of events");
 
         //Multiplicity vs 1D cluster position
-        TH2S* ClusterMultPosX = new TH2S("ClusterMultPosX","Cluster multiplicity vs position of X clusters",2*nStrips+1,-0.5,2*nStrips+0.5,nStrips,-0.5,nStrips-0.5);
+        TH2S* ClusterMultPosX = new TH2S("ClusterMultPosX","Cluster multiplicity vs position of X clusters",2*nStrips+1,-0.5,2*nStrips+0.5,2*nStrips,-0.25,nStrips-0.75);
         ClusterMultPosX->SetXTitle("Multiplicity");
         ClusterMultPosX->SetYTitle("Strip");
         ClusterMultPosX->SetZTitle("# of events");
 
-        TH2S* ClusterMultPosY = new TH2S("ClusterMultPosY","Cluster multiplicity vs position of Y clusters",2*nStrips+1,-0.5,2*nStrips+0.5,nStrips,nStrips-0.5,2*nStrips-0.5);
+        TH2S* ClusterMultPosY = new TH2S("ClusterMultPosY","Cluster multiplicity vs position of Y clusters",2*nStrips+1,-0.5,2*nStrips+0.5,2*nStrips,nStrips-0.25,2*nStrips-0.75);
         ClusterMultPosY->SetXTitle("Multiplicity");
         ClusterMultPosY->SetYTitle("Strip");
         ClusterMultPosY->SetZTitle("# of events");
 
+        //Multiplicity vs time stamp
+        TH2F* ClusterMultTimeX = new TH2F("ClusterMultTimeX","Cluster multiplicity vs time stamp of X clusters",2*nStrips+1,-0.5,2*nStrips+0.5,window/10,start,end);
+        ClusterMultTimeX->SetXTitle("Multiplicity");
+        ClusterMultTimeX->SetYTitle("Time [ns]");
+        ClusterMultTimeX->SetZTitle("# of events");
+
+        TH2F* ClusterMultTimeY = new TH2F("ClusterMultTimeY","Cluster multiplicity vs time of Y clusters",2*nStrips+1,-0.5,2*nStrips+0.5,window/10,start,end);
+        ClusterMultTimeY->SetXTitle("Multiplicity");
+        ClusterMultTimeY->SetYTitle("Time [ns]");
+        ClusterMultTimeY->SetZTitle("# of events");
+
+        //Cluster position vs time stamp
+        TH2F* ClusterPosTimeX = new TH2F("ClusterPosTimeX","Cluster center vs time stamp of X clusters",2*nStrips,-0.25,nStrips-0.75,window/10,start,end);
+        ClusterPosTimeX->SetXTitle("Strip");
+        ClusterPosTimeX->SetYTitle("Time [ns]");
+        ClusterPosTimeX->SetZTitle("# of events");
+
+        TH2F* ClusterPosTimeY = new TH2F("ClusterPosTimeY","Cluster center vs time of Y clusters",2*nStrips,nStrips-0.25,2*nStrips-0.75,window/10,start,end);
+        ClusterPosTimeY->SetXTitle("Strip");
+        ClusterPosTimeY->SetYTitle("Time[s]");
+        ClusterPosTimeY->SetZTitle("# of events");
+
+        //Cluster spread vs cluster size
+        TH2F* ClusterDiffSizeX = new TH2F("ClusterDiffSizeX","Cluster spread vs cluster size of X clusters",(int)ClustDev,0,ClustDev,nStrips,0.5,nStrips+0.5);
+        ClusterDiffSizeX->SetXTitle("Time [ns]");
+        ClusterDiffSizeX->SetYTitle("Cluster size");
+        ClusterDiffSizeX->SetZTitle("# of events");
+
+        TH2F* ClusterDiffSizeY = new TH2F("ClusterDiffSizeY","Cluster spread vs cluster size of Y clusters",(int)ClustDev,0,ClustDev,nStrips,0.5,nStrips+0.5);
+        ClusterDiffSizeY->SetXTitle("Time [ns]");
+        ClusterDiffSizeY->SetYTitle("Cluster size");
+        ClusterDiffSizeY->SetZTitle("# of events");
+
         //Cluster Sizes
         TH1S* ClusterSizeX = new TH1S("ClusterSizeX","Size of X cluster",nStrips,0.5,nStrips+0.5);
-        ClusterSizeX->SetXTitle("Multiplicity");
+        ClusterSizeX->SetXTitle("Cluster size");
         ClusterSizeX->SetYTitle("# of events");
 
         TH1S* ClusterSizeY = new TH1S("ClusterSizeY","Size of Y cluster",nStrips,0.5,nStrips+0.5);
-        ClusterSizeY->SetXTitle("Multiplicity");
+        ClusterSizeY->SetXTitle("Cluster size");
         ClusterSizeY->SetYTitle("# of events");
 
         TH2S* ClusterSizeXY = new TH2S("ClusterSizeXY","Size of XY cluster",nStrips,0.5,nStrips+0.5,nStrips,0.5,nStrips+0.5);
-        ClusterSizeXY->SetXTitle("Multiplicity X");
-        ClusterSizeXY->SetYTitle("Multiplicity Y");
+        ClusterSizeXY->SetXTitle("Cluster size X");
+        ClusterSizeXY->SetYTitle("Cluster size Y");
         ClusterSizeXY->SetZTitle("# of events");
 
         //************ EFFICIENCY
@@ -502,10 +535,10 @@ void Analyse(string fName, int nStrips, float start, float end){
                 StripCluster.clear();
 
                 //Fill the 1D cluster multiplicity histograms
-                ClusterMultiplicityX->Fill(ClusterListX.size());
-                ClusterMultiplicityY->Fill(ClusterListY.size());
 
                 //For each 1D cluster on X readout
+                ClusterMultiplicityX->Fill(ClusterListX.size());
+
                 for(unsigned int x = 0; x<ClusterListX.size(); x++){
                     //Fill the 1D cluster histograms
                     //of X readout
@@ -515,35 +548,45 @@ void Analyse(string fName, int nStrips, float start, float end){
 
                     float xTime = GetClusterStart(ClusterListX[x]);
                     ClusterTimeX->Fill(xTime);
+                    ClusterMultTimeX->Fill(ClusterListX.size(),xTime);
+                    ClusterPosTimeX->Fill(xCenter,xTime);
 
                     ClusterSizeX->Fill(ClusterListX[x].size());
 
                     //Get the time spread of the cluster
-                    if(ClusterListX[x].size() > 1 && ClusterListX[x].size() < 5){
+                    if(ClusterListX[x].size() > 1){
                         float lastXstamp = ClusterListX[x].back().second;
                         ClusterDiffX->Fill(lastXstamp-xTime);
+                        ClusterDiffSizeX->Fill(lastXstamp-xTime,ClusterListX[x].size());
                     }
                 }
 
                 //For each 1D cluster on Y readout
-                for(unsigned int y = 0; y<ClusterListY.size(); y++){
-                    //Fill the 1D cluster histograms
-                    //of Y readout
-                    float yCenter = Get1DClusterCenter(ClusterListY[y]);
-                    ClusterProfileY->Fill(yCenter);
-                    ClusterMultPosY->Fill(ClusterListY.size(),yCenter);
+//                if(ClusterListY.size() < 5){
+                    ClusterMultiplicityY->Fill(ClusterListY.size());
 
-                    float yTime = GetClusterStart(ClusterListY[y]);
-                    ClusterTimeY->Fill(yTime);
+                    for(unsigned int y = 0; y<ClusterListY.size(); y++){
+                        //Fill the 1D cluster histograms
+                        //of Y readout
+                        float yCenter = Get1DClusterCenter(ClusterListY[y]);
+                        ClusterProfileY->Fill(yCenter);
+                        ClusterMultPosY->Fill(ClusterListY.size(),yCenter);
 
-                    ClusterSizeY->Fill(ClusterListY[y].size());
+                        float yTime = GetClusterStart(ClusterListY[y]);
+                        ClusterTimeY->Fill(yTime);
+                        ClusterMultTimeY->Fill(ClusterListY.size(),yTime);
+                        ClusterPosTimeY->Fill(yCenter,yTime);
 
-                    //Get the time spread of the cluster
-                    if(ClusterListY[y].size() > 1 && ClusterListY[y].size() < 5){
-                        float lastYstamp = ClusterListY[y].back().second;
-                        ClusterDiffY->Fill(lastYstamp-yTime);
+                        ClusterSizeY->Fill(ClusterListY[y].size());
+
+                        //Get the time spread of the cluster
+                        if(ClusterListY[y].size() > 1){
+                            float lastYstamp = ClusterListY[y].back().second;
+                            ClusterDiffY->Fill(lastYstamp-yTime);
+                            ClusterDiffSizeY->Fill(lastYstamp-yTime,ClusterListY[y].size());
+                        }
                     }
-                }
+//                }
 
                 //Loop over clusters and build 2D clusters
                 if(ClusterListX.size() > 0 && ClusterListY.size() > 0){
@@ -595,8 +638,11 @@ void Analyse(string fName, int nStrips, float start, float end){
 
                 //The detector is defined as efficient is there was at least
                 //1 2D cluster
-                if((ClusterListX.size() > 0 && ClusterListX.size() < 3) || (ClusterListY.size() > 0 && ClusterListY.size() < 3)) Efficiency->Fill(1);
-                else Efficiency->Fill(0);
+//                if((ClusterListX.size() > 0 && ClusterListX.size() < 3) || (ClusterListY.size() > 0 && ClusterListY.size() < 3)) Efficiency->Fill(1);
+//                if(ClusterListY.size() < 5){
+                    if(ClusterListY.size() > 0) Efficiency->Fill(1);
+                    else Efficiency->Fill(0);
+//                }
 
                 //Push the list of strips and time stamps into TDCData
                 TDCData.ChannelList->push_back(tmpStrips);
@@ -605,7 +651,10 @@ void Analyse(string fName, int nStrips, float start, float end){
         }
 
         //Write efficiency results in CSV file
-        ResultFile << HVstep << '\t' << Efficiency->GetMean() << '\t' << Efficiency->GetStdDev() << endl;
+        float Nevt = Efficiency->GetEntries();
+        float eff = Efficiency->GetMean();
+        float stddev = sqrt(eff*(1-eff)/Nevt);
+        ResultFile << HVstep << '\t' << eff << '\t' << stddev << endl;
 
         //Write all histograms into the ROOT file
         StripProfileX->Write();
@@ -629,6 +678,12 @@ void Analyse(string fName, int nStrips, float start, float end){
         ClusterMultiplicityXY->Write();
         ClusterMultPosX->Write();
         ClusterMultPosY->Write();
+        ClusterMultTimeX->Write();
+        ClusterMultTimeY->Write();
+        ClusterPosTimeX->Write();
+        ClusterPosTimeY->Write();
+        ClusterDiffSizeX->Write();
+        ClusterDiffSizeY->Write();
         ClusterSizeX->Write();
         ClusterSizeY->Write();
         ClusterSizeXY->Write();

@@ -18,6 +18,8 @@
 
 using namespace std;
 
+const float ClustDev = 20.;
+
 typedef vector<int> Events;                 //List of event tags
 typedef vector<int> hMult;                  //List of TDC hit multiplicity
 typedef vector<int> eStrips;                //List of fired strips per event

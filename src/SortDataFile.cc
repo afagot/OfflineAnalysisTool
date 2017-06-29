@@ -160,23 +160,27 @@ void SortData(string fName, int nStrips){
                         XData.push_back(make_pair(strip,time));
                     } else if(strip < 2*nStrips)
                         //if(strip != 14) YData.push_back(make_pair(strip,time));
-                        YData.push_back(make_pair(strip,time));
+                        //YData.push_back(make_pair(strip,time));
+                        if(strip >= 19 && strip <= 26) YData.push_back(make_pair(strip,time));
                 }
 
                 //Sort the arrays per time stamp and print the sorted data
-                if(XData.size() > 1) SortEvent(XData,0,XData.size()-1,"TIME");
-                if(YData.size() > 1) SortEvent(YData,0,YData.size()-1,"TIME");
+                //add a cut at nHits == 5
+//                if(YData.size() <= 5){
+                    if(XData.size() > 1) SortEvent(XData,0,XData.size()-1,"TIME");
+                    if(YData.size() > 1) SortEvent(YData,0,YData.size()-1,"TIME");
 
-                sortedFile << nEvent << '\t' << XData.size() << '\t' << YData.size() << endl;
+                    sortedFile << nEvent << '\t' << XData.size() << '\t' << YData.size() << endl;
 
-                for(unsigned int h = 0; h < XData.size(); h++){
-                    sortedFile << '\t' << XData[h].first << '\t' << XData[h].second << endl;
-                }
+                    for(unsigned int h = 0; h < XData.size(); h++){
+                        sortedFile << '\t' << XData[h].first << '\t' << XData[h].second << endl;
+                    }
+
+                    for(unsigned int h = 0; h < YData.size(); h++){
+                        sortedFile << '\t' << YData[h].first << '\t' << YData[h].second << endl;
+                    }
+//                }
                 XData.clear();
-
-                for(unsigned int h = 0; h < YData.size(); h++){
-                    sortedFile << '\t' << YData[h].first << '\t' << YData[h].second << endl;
-                }
                 YData.clear();
             }
         }

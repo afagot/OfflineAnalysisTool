@@ -144,7 +144,7 @@ float Get1DClusterCenter(Cluster cluster){
 
     if(cluster.size() > 0){
         //Sum all the strip numbers in the cluster
-        for(unsigned int i; i<cluster.size(); i++)
+        for(unsigned int i =0; i<cluster.size(); i++)
             center += cluster[i].first;
 
         //divide by the cluster size
@@ -638,7 +638,7 @@ void Analyse(string fName, int nStrips, float start, float end){
 
                 //The detector is defined as efficient is there was at least
                 //1 2D cluster
-//                if((ClusterListX.size() > 0 && ClusterListX.size() < 3) || (ClusterListY.size() > 0 && ClusterListY.size() < 3)) Efficiency->Fill(1);
+                // if((ClusterListX.size() > 0 && ClusterListX.size() < 3) || (ClusterListY.size() > 0 && ClusterListY.size() < 3)) Efficiency->Fill(1);
 //                if(ClusterListY.size() < 5){
                     if(ClusterListY.size() > 0) Efficiency->Fill(1);
                     else Efficiency->Fill(0);

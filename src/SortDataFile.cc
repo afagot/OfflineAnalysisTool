@@ -7,6 +7,7 @@
 #include "../include/SortDataFile.h"
 #include "../include/MsgSvc.h"
 #include "../include/utils.h"
+#include <sstream>
 
 using namespace std;
 
@@ -154,19 +155,26 @@ void SortData(string fName, int nStrips){
                     int strip = -1;
                     float time = -1;
 
-                        rawFile >> strip >> time;       //Save data pairs into the array.
+                    rawFile >> strip >> time;       //Save data pairs into the array.
                     if(strip < nStrips){
                         //if(strip != 0) XData.push_back(make_pair(strip,time));
                         XData.push_back(make_pair(strip,time));
-                    } else if(strip < 2*nStrips)
+                    } else if(strip < 2*nStrips){
                         //if(strip != 14) YData.push_back(make_pair(strip,time));
                         //YData.push_back(make_pair(strip,time));
-                        if(strip >= 19 && strip <= 26) YData.push_back(make_pair(strip,time));
+                        if(strip >= 19 && strip <= 26)
+                          YData.push_back(make_pair(strip,time));
+                    } else{
+                        std::ostringstream oss;
+                        oss << "Found hit in strip '" << strip << "' But only '" << 2*nStrips <<"' were defined.\n";
+                        MSG_WARNING("%s",oss.str().c_str());
+                        exit(-1);
+                    }
                 }
 
                 //Sort the arrays per time stamp and print the sorted data
                 //add a cut at nHits == 5
-//                if(YData.size() <= 5){
+              //  if(YData.size() <= 5){
                     if(XData.size() > 1) SortEvent(XData,0,XData.size()-1,"TIME");
                     if(YData.size() > 1) SortEvent(YData,0,YData.size()-1,"TIME");
 

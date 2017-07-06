@@ -186,7 +186,7 @@ int createDir(std::string dirPath){
   else if (ENOENT == errno)
   {
     /* Directory does not exist. */
-    MSG_ERROR("Creating directory '%s'\n", dirPath.c_str());
+    MSG_INFO("Creating directory '%s'\n", dirPath.c_str());
     const int dirCode = mkdir(dirPath.c_str(), S_IRWXU | S_IRGRP | S_IXGRP | S_IROTH | S_IXOTH); // 755 rights
     if (-1 == dirCode)
     {

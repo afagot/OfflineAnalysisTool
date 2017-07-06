@@ -174,7 +174,7 @@ int SortData(string fName, Options &optionMap){
                         std::ostringstream oss;
                         oss << "Found hit in strip '" << strip << "' But only '" << 2*nStrips <<"' were defined.\n";
                         MSG_WARNING("%s",oss.str().c_str());
-                        return(-1);
+                        return EXIT_FAILURE;
                     }
                 }
 

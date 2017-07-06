@@ -84,7 +84,7 @@ void createListDataFiles(std::string dataPath, std::string fExt, Options &option
     closedir (dir);
   } else {
     /* could not open directory */
-    MSG_ERROR ("Could not open directory '%s'",dataPath);
+    MSG_ERROR ("Could not open directory '%s'",dataPath.c_str());
     return;
   }
 }
@@ -97,7 +97,7 @@ int main(int argc, char* argv[]){
     } else {
         Options optionMap;
         loadJsonFile(argv[1], optionMap);
-        dumpOptions(optionMap);
+        printOptions(optionMap);
         
         createListDataFiles(optionMap["dataPath"].asString(), ".dat", optionMap);
         if (optionMap["dataFiles"].empty())

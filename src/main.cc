@@ -120,7 +120,11 @@ int main(int argc, char* argv[]){
           //Sort the data by time stamp and
           //divide it into X readout and Y
           //readout data
-          SortData(fName.asString(), optionMap);
+          if (-1 != SortData(fName.asString(), optionMap))
+          {
+            MSG_ERROR("Failed to sort the data, exiting...\n");
+            return EXIT_FAILURE;
+          }
           //Clusterize data files and make histograms
           Analyse(fName.asString(), optionMap);
         }

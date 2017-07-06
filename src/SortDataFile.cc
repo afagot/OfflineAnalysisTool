@@ -9,6 +9,7 @@
 #include "../include/utils.h"
 #include <sstream>
 
+
 using namespace std;
 
 ifstream &GotoLine(ifstream& file, unsigned int line){
@@ -118,7 +119,7 @@ void SortEvent(Cluster& A, int f, int l, string option){
 
 //with a line of 0s in between each event (trigger).
 
-void SortData(string fName, Options &optionMap){
+int SortData(string fName, Options &optionMap){
     string HVstep = GetVoltage(fName)+"V_";              //Extract voltage step from file header.
     int nStrips = optionMap["nStrips"].asInt();
     
@@ -150,7 +151,7 @@ void SortData(string fName, Options &optionMap){
             if(nEvent == -1 && nHits == -1){            //If nothing is read, this is the
                 MSG_INFO("End of sorting.\n");          //end.
                 rawFile.close();
-                return;
+                return(-1);
             } else {
                 for(int h=0; h<nHits; h++){             //else loop on every hit.
                     int strip = -1;
@@ -169,7 +170,7 @@ void SortData(string fName, Options &optionMap){
                         std::ostringstream oss;
                         oss << "Found hit in strip '" << strip << "' But only '" << 2*nStrips <<"' were defined.\n";
                         MSG_WARNING("%s",oss.str().c_str());
-                        exit(-1);
+                        return(-1);
                     }
                 }
 
@@ -195,8 +196,9 @@ void SortData(string fName, Options &optionMap){
         }
         sortedFile.close();
         MSG_INFO("Data sorting finished.\n");
+        return(-1);
     } else {
         MSG_ERROR("Couldn't open data file to sort.\n");
-        return;
+        return(1);
     }
 }

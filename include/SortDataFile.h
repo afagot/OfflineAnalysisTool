@@ -28,6 +28,6 @@ int RandomPivot(int first,int last);
 int Partition(Cluster& A, int f, int l, string option);
 void SortEvent(Cluster& A, int f, int l, string option);
 // void SortData(string fName, int nStrips); // Old
-void SortData(string fName, Options &optionMap);
+int SortData(string fName, Options &optionMap);
 
 #endif // SORTDATAFILE_H

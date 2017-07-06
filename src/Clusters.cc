@@ -160,7 +160,7 @@ float Get1DClusterCenter(Cluster cluster){
 //each event.
 
 // void Analyse(string fName, int nStrips, float start, float end){
-void Analyse(string fName, Options &optionMap){
+int Analyse(string fName, Options &optionMap){
     int nStrips = optionMap["nStrips"].asInt();
     float start = optionMap["startTimeCut"].asFloat();
     float end = optionMap["endTimeCut"].asFloat();
@@ -443,7 +443,7 @@ void Analyse(string fName, Options &optionMap){
 
                         if(time == -1 && strip == -1){
                             MSG_ERROR("Problem with the X event : %d\n",nEvent);
-                            return;
+                            return(EXIT_FAILURE);
                         } else {
                             //Fill the strips and time stamps for TDCData
                             tmpStrips.push_back(strip);
@@ -505,7 +505,7 @@ void Analyse(string fName, Options &optionMap){
                         if(time == -1 && strip == -1){
                             MSG_ERROR("Problem with the Y event : ");
                             cout << nEvent << endl;
-                            return;
+                            return(EXIT_FAILURE);
                         } else {
                             //Fill the strips and time stamps for TDCData
                             tmpStrips.push_back(strip);
@@ -711,9 +711,10 @@ void Analyse(string fName, Options &optionMap){
         ResultFile.close();
         output.close();
         MSG_INFO("Data analysis done.\n");
+        return -1;
     } else {
         MSG_ERROR("Couldn't open data file to clusterize.\n");
-        return;
+        return(EXIT_FAILURE);
     }
     input.close();
 }

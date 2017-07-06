@@ -10,8 +10,12 @@
 #include <fstream>
 #include <cstdio>
 #include <map>
+#include <sys/stat.h>
+#include <dirent.h>
+
 
 #include "../include/utils.h"
+#include "../include/MsgSvc.h"
 
 #include "TStyle.h"
 
@@ -166,4 +170,35 @@ void DrawTH2(TCanvas* C, TH2* H, string xtitle, string ytitle, string ztitle, st
     H->Draw(option.c_str());
     C->SetLogz(1);
     C->Update();
+}
+
+  /** 
+      if dirPath already exist do nothing
+      return status code
+    */
+int createDir(std::string dirPath){
+  DIR* dir = opendir(dirPath.c_str());
+  if (dir)
+  {
+    closedir(dir);
+    return -1;
+  }
+  else if (ENOENT == errno)
+  {
+    /* Directory does not exist. */
+    MSG_ERROR("Creating directory '%s'\n", dirPath.c_str());
+    const int dirCode = mkdir(dirPath.c_str(), S_IRWXU | S_IRGRP | S_IXGRP | S_IROTH | S_IXOTH); // 755 rights
+    if (-1 == dirCode)
+    {
+      MSG_ERROR("Error creating directory!\n");
+      return(EXIT_FAILURE);
+    }
+    return -1;
+  }
+  else
+  {
+      /* opendir() failed for some other reason. */
+      MSG_ERROR("Failed to open directory '%s'\n", dirPath.c_str());
+      return(EXIT_FAILURE);
+  }
 }

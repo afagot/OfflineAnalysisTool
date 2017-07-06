@@ -168,7 +168,7 @@ int Analyse(string fName, Options &optionMap){
     
 
     string HVstep = GetVoltage(fName);
-    string prefix = "SORTED_" + HVstep + "V_";
+    string prefix = "DAT/SORTED_" + HVstep + "V_";
 
     //Open inputfile
     unsigned NameInPath = fName.find_last_of("/")+1;
@@ -192,12 +192,18 @@ int Analyse(string fName, Options &optionMap){
         string pathName = dName.substr(0,dName.find_last_of("/")+1);
         string outputName = dName.substr(dName.find_first_of("_")+1);
 
-        string ResultName = pathName + "RESULT_" + outputName + ".csv";
+        if (-1 != createDir( pathName + "CSV/"))
+          return(EXIT_FAILURE);
+
+        string ResultName = pathName + "CSV/RESULT_" + outputName + ".csv";
         ofstream ResultFile(ResultName.c_str(),ios::out);
 
         //******************** ROOT OUTPUT FILE **********************
 
-        string fNameROOT = pathName + "ROOT_" + outputName + ".root";
+        if (-1 != createDir( pathName + "ROOT/"))
+          return(EXIT_FAILURE);
+
+        string fNameROOT = pathName + "ROOT/ROOT_" + outputName + ".root";
         TFile ResultROOT(fNameROOT.c_str(),"RECREATE");
 
         //************************ DATA TREE *************************

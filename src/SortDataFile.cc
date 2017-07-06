@@ -136,10 +136,14 @@ int SortData(string fName, Options &optionMap){
 
         vector < pair<int,float> > YData;               //Array to contain hit list for
         YData.clear();                                  //each event in Y readout.
+        
 
+        if (-1 != createDir( optionMap["dataPath"].asString() + "DAT/"))
+          return(EXIT_FAILURE);
+        
         unsigned NameInPath = fName.find_last_of("/")+1;
         string oName = fName.insert(NameInPath,HVstep);
-        oName = oName.insert(NameInPath,"SORTED_");
+        oName = oName.insert(NameInPath,"DAT/SORTED_");
         ofstream sortedFile(oName.c_str(), ios::out);   //Open output file in write mode.
 
         while(rawFile.good()){

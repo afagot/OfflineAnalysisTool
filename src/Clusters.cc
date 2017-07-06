@@ -159,8 +159,13 @@ float Get1DClusterCenter(Cluster cluster){
 //in each event to make a new outputfile the the hits grouped as clusters in
 //each event.
 
-void Analyse(string fName, int nStrips, float start, float end){
+// void Analyse(string fName, int nStrips, float start, float end){
+void Analyse(string fName, Options &optionMap){
+    int nStrips = optionMap["nStrips"].asInt();
+    float start = optionMap["startTimeCut"].asFloat();
+    float end = optionMap["endTimeCut"].asFloat();
     float window = end - start;
+    
 
     string HVstep = GetVoltage(fName);
     string prefix = "SORTED_" + HVstep + "V_";

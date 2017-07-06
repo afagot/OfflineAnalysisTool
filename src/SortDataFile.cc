@@ -118,9 +118,10 @@ void SortEvent(Cluster& A, int f, int l, string option){
 
 //with a line of 0s in between each event (trigger).
 
-void SortData(string fName, int nStrips){
+void SortData(string fName, Options &optionMap){
     string HVstep = GetVoltage(fName)+"V_";              //Extract voltage step from file header.
-
+    int nStrips = optionMap["nStrips"].asInt();
+    
     ifstream rawFile(fName.c_str(),ios::in);            //Open data file in read mode.
 
     if(rawFile.is_open()){

@@ -15,6 +15,7 @@
 #include <string>
 #include <utility>
 #include <cmath>
+#include <json/json.h>
 
 using namespace std;
 
@@ -28,6 +29,7 @@ typedef vector<eStrips> esList;             //List of eStrip
 typedef vector<eTimes> etList;              //List of eTime
 typedef vector< pair<int,float> > Cluster;  //List of strip + time stamps grouped as cluster
 typedef vector<Cluster> ClusterList;        //List of clusters
+typedef std::map<std::string, Json::Value> Options; // Options read from Json config file 
 
 struct RAWData{
     Events* EventList;
@@ -43,6 +45,7 @@ void  GroupStrips(Cluster &tCluster, Cluster& sCluster, ClusterList& cList);
 float GetClusterStart(Cluster& cluster);
 bool  Is2DCluster(Cluster clusterX, Cluster clusterY);
 float Get1DClusterCenter(Cluster cluster);
-void  Analyse(string fName, int nStrips, float start, float end);
+// void  Analyse(string fName, int nStrips, float start, float end); // Old
+void  Analyse(string fName, Options &optionMap);
 
 #endif // CLUSTERS_H

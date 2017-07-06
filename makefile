@@ -25,8 +25,9 @@ CC = g++ -std=c++11
 
 all: analysis
 
-analysis: main.o Clusters.o SortDataFile.o utils.o
+analysis: jsoncpp.o main.o Clusters.o SortDataFile.o utils.o
 	$(CC) $(CFLAGS) $(DAQ_OBJ_DIR)/main.o \
+	$(DAQ_OBJ_DIR)/jsoncpp.o \
 	$(DAQ_OBJ_DIR)/Clusters.o \
 	$(DAQ_OBJ_DIR)/SortDataFile.o \
 	$(DAQ_OBJ_DIR)/utils.o \
@@ -34,7 +35,9 @@ analysis: main.o Clusters.o SortDataFile.o utils.o
         $(LFLAGS)  \
         -l curses
 
-main.o:
+jsoncpp.o:
+	$(CC) $(CFLAGS) -c $(DAQ_SRC_DIR)/jsoncpp.cpp -o $(DAQ_OBJ_DIR)/jsoncpp.o
+main.o: 
 	$(CC) $(CFLAGS) -c $(DAQ_SRC_DIR)/main.cc -o $(DAQ_OBJ_DIR)/main.o
 Clusters.o:
 	$(CC) $(CFLAGS) -c $(DAQ_SRC_DIR)/Clusters.cc -o $(DAQ_OBJ_DIR)/Clusters.o

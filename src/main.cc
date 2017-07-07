@@ -83,7 +83,7 @@ int main(int argc, char* argv[]){
         // Print  content of the option file
         std::cout << root << std::endl;
         
-        Json::Value fileValues = root["Global"].get("dataFiles","");
+        Json::Value fileValues = root["Global"]["DataFiles"];
         if( -1 != createListDataFiles(root["Global"].get("DataPath","nowhere").asString(), ".dat", fileValues)){        
           return EXIT_FAILURE;
         }

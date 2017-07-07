@@ -51,6 +51,10 @@ INCLUDE_DIRECTORIES( ${PROJECT_SOURCE_DIR}/include )
 # Add source directory
 AUX_SOURCE_DIRECTORY( src SRC_FILES )
 ADD_LIBRARY( ${PROJECT_NAME} SHARED ${SRC_FILES} )
+INSTALL( 
+    TARGETS ${PROJECT_NAME}
+    LIBRARY DESTINATION ${PROJECT_SOURCE_DIR}/lib
+)
 
 # -------------------------------------------------
 # Build/Install executable

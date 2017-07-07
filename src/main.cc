@@ -18,12 +18,12 @@
 using namespace std;
 typedef std::map<std::string, Json::Value> Options; // Options read from Json config file 
 
-void loadJsonFile(const std::string& fileName, Options &optionMap){
   
+int loadJsonFile(const std::string& fileName, Options &optionMap){
   if (fileName.empty())
   {
     MSG_ERROR("Please provide a config file");
-    return;
+    return EXIT_FAILURE;
   }    
   
   Json::Reader reader;
@@ -31,7 +31,7 @@ void loadJsonFile(const std::string& fileName, Options &optionMap){
   std::ifstream ifs (fileName.c_str(), std::ifstream::in);
   if (!ifs.good()){
     MSG_ERROR("Failed to open file '%s' \n",fileName.c_str());
-    return;
+    return EXIT_FAILURE;
   }
   
   bool isParsed = reader.parse(ifs, root, false);
@@ -39,7 +39,7 @@ void loadJsonFile(const std::string& fileName, Options &optionMap){
   {
     // Report failures and their locations in the document.
     MSG_ERROR("Failed to parse JSON\n%s\n",reader.getFormatedErrorMessages().c_str());
-    return ;
+    return EXIT_FAILURE;
   }
   const Json::Value &globalValues = root["Global"];
   optionMap["dataPath"] = globalValues.get("DataPath","").asString();
@@ -51,6 +51,7 @@ void loadJsonFile(const std::string& fileName, Options &optionMap){
   optionMap["startTimeCut"] = clusterValues.get("StartTimeCut", 0).asInt();
   optionMap["endTimeCut"] = clusterValues.get("EndTimeCut", 1000).asInt();
   Json::StyledWriter styledWriter;
+  return -1;
 }
 
 void printOptions(Options &optionMap){
@@ -65,7 +66,7 @@ void printOptions(Options &optionMap){
     fExt file : extension to look for
     optionMap : Options to populate
   */
-void createListDataFiles(std::string dataPath, std::string fExt, Options &optionMap){
+int createListDataFiles(const std::string &dataPath, const std::string fExt, Options &optionMap){
   DIR *dir;
   struct dirent *ent;
   Json::Value fileValues;
@@ -82,10 +83,11 @@ void createListDataFiles(std::string dataPath, std::string fExt, Options &option
     }
     optionMap["dataFiles"] = fileValues;
     closedir (dir);
+    return -1;
   } else {
     /* could not open directory */
     MSG_ERROR ("Could not open directory '%s'",dataPath.c_str());
-    return;
+    return EXIT_FAILURE;
   }
 }
 
@@ -96,8 +98,14 @@ int main(int argc, char* argv[]){
         return 1;
     } else {
         Options optionMap;
-        loadJsonFile(argv[1], optionMap);
         printOptions(optionMap);
+        if( -1 != loadJsonFile(argv[1], options)){
+          return EXIT_FAILURE;
+        }
+        
+        if( -1 != createListDataFiles(roptionMap["dataPath"].asString(), ".dat", optionMap)){
+          return EXIT_FAILURE;
+        }
         
         createListDataFiles(optionMap["dataPath"].asString(), ".dat", optionMap);
         if (optionMap["dataFiles"].empty())
@@ -126,7 +134,11 @@ int main(int argc, char* argv[]){
             return EXIT_FAILURE;
           }
           //Clusterize data files and make histograms
-          Analyse(fName.asString(), optionMap);
+          if (-1 != Analyse(fName.asString(), optionMap))
+          {
+            MSG_ERROR("Failed to sort the data, exiting...\n");
+            return EXIT_FAILURE;
+          }
         }
         return 0;
     }

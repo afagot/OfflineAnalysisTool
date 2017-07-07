@@ -168,34 +168,32 @@ int Analyse(const string fName, Json::Value &options){
     
 
     string HVstep = GetVoltage(fName);
-    string prefix = "DAT/SORTED_" + HVstep + "V_";
 
     //Open inputfile
-    unsigned NameInPath = fName.find_last_of("/")+1;
-    string dName = fName.insert(NameInPath,prefix);
-    ifstream input(dName.c_str(),ios::in);
+    string pathName = fName.substr(0,fName.find_last_of("/")+1);
+    string dName = fName.substr(fName.find_last_of("/")+1);
+    dName.insert(0, HVstep + "V_");
+
+    string clustName = pathName + "DAT/SORTED_" + dName;
+    ifstream input(clustName.c_str(),ios::in);
 
     if(input.is_open()){
         MSG_INFO("Open the file and start clusterization.\n");
 
         //******************** CLUSTERIZED FILE **********************
 
-        dName.erase(NameInPath,7);
-        dName.insert(NameInPath,"CLUSTERIZED_");
-        ofstream output(dName.c_str(),ios::out);
+        clustName = pathName + "DAT/CLUSTERIZED_" + dName;
+        ofstream output(clustName.c_str(),ios::out);
 
         //******************** CSV OUTPUT FILE ***********************
 
         if ( dName.substr(dName.find_last_of(".")) == ".dat" )
             dName.erase(dName.find_last_of("."));
 
-        string pathName = dName.substr(0,dName.find_last_of("/")+1);
-        string outputName = dName.substr(dName.find_first_of("_")+1);
-
         if (-1 != createDir( pathName + "CSV/"))
           return(EXIT_FAILURE);
 
-        string ResultName = pathName + "CSV/RESULT_" + outputName + ".csv";
+        string ResultName = pathName + "CSV/RESULT_" + dName + ".csv";
         ofstream ResultFile(ResultName.c_str(),ios::out);
 
         //******************** ROOT OUTPUT FILE **********************
@@ -203,7 +201,7 @@ int Analyse(const string fName, Json::Value &options){
         if (-1 != createDir( pathName + "ROOT/"))
           return(EXIT_FAILURE);
 
-        string fNameROOT = pathName + "ROOT/ROOT_" + outputName + ".root";
+        string fNameROOT = pathName + "ROOT/ROOT_" + dName + ".root";
         TFile ResultROOT(fNameROOT.c_str(),"RECREATE");
 
         //************************ DATA TREE *************************
@@ -573,7 +571,7 @@ int Analyse(const string fName, Json::Value &options){
                 }
 
                 //For each 1D cluster on Y readout
-//                if(ClusterListY.size() < 5){
+              //  if(ClusterListY.size() < 5){
                     ClusterMultiplicityY->Fill(ClusterListY.size());
 
                     for(unsigned int y = 0; y<ClusterListY.size(); y++){
@@ -597,7 +595,7 @@ int Analyse(const string fName, Json::Value &options){
                             ClusterDiffSizeY->Fill(lastYstamp-yTime,ClusterListY[y].size());
                         }
                     }
-//                }
+              //  }
 
                 //Loop over clusters and build 2D clusters
                 if(ClusterListX.size() > 0 && ClusterListY.size() > 0){
@@ -650,10 +648,10 @@ int Analyse(const string fName, Json::Value &options){
                 //The detector is defined as efficient is there was at least
                 //1 2D cluster
                 // if((ClusterListX.size() > 0 && ClusterListX.size() < 3) || (ClusterListY.size() > 0 && ClusterListY.size() < 3)) Efficiency->Fill(1);
-//                if(ClusterListY.size() < 5){
+              //  if(ClusterListY.size() < 5){
                     if(ClusterListY.size() > 0) Efficiency->Fill(1);
                     else Efficiency->Fill(0);
-//                }
+              //  }
 
                 //Push the list of strips and time stamps into TDCData
                 TDCData.ChannelList->push_back(tmpStrips);

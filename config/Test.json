@@ -1,0 +1,21 @@
+{
+  "Global":
+  {
+    "DataPath": "/EmptyPath/", // Need to finish with a '/'
+    "NStrips": 16
+  },
+  "SortData":
+  {
+    "XStripMin": -1,
+    "XStripMax": 100, 
+    "YStripMin": -1, 
+    "YStripMax": 100,
+    "XNHitMax": 500,
+    "YNHitMax": 500
+  },
+  "Clusters":
+  {
+    "StartTimeCut": 0, 
+    "EndTimeCut": 1000
+  }
+}

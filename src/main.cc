@@ -16,10 +16,7 @@
 
 
 using namespace std;
-typedef std::map<std::string, Json::Value> Options; // Options read from Json config file 
-
-  
-int loadJsonFile(const std::string& fileName, Options &optionMap){
+int loadJsonFile(const std::string& fileName, Json::Value &root){
   if (fileName.empty())
   {
     MSG_ERROR("Please provide a config file");
@@ -27,7 +24,7 @@ int loadJsonFile(const std::string& fileName, Options &optionMap){
   }    
   
   Json::Reader reader;
-  Json::Value root;   // 'root' will contain the root value after parsing.
+  // Json::Value root;   // 'root' will contain the root value after parsing.
   std::ifstream ifs (fileName.c_str(), std::ifstream::in);
   if (!ifs.good()){
     MSG_ERROR("Failed to open file '%s' \n",fileName.c_str());
@@ -41,35 +38,18 @@ int loadJsonFile(const std::string& fileName, Options &optionMap){
     MSG_ERROR("Failed to parse JSON\n%s\n",reader.getFormatedErrorMessages().c_str());
     return EXIT_FAILURE;
   }
-  const Json::Value &globalValues = root["Global"];
-  optionMap["dataPath"] = globalValues.get("DataPath","").asString();
-  optionMap["nStrips"] = globalValues.get("NStrips", 16).asInt();
-
-  const Json::Value &sortValues = root["SortData"];
   
-  const Json::Value &clusterValues = root["Clusters"];
-  optionMap["startTimeCut"] = clusterValues.get("StartTimeCut", 0).asInt();
-  optionMap["endTimeCut"] = clusterValues.get("EndTimeCut", 1000).asInt();
   Json::StyledWriter styledWriter;
   return -1;
 }
-
-void printOptions(Options &optionMap){
-  MSG_INFO("\n\t--- Dumping optionMap ---\n");
-  for (auto const& item:optionMap)
-    std::cout << item.first << " : " << item.second << std::endl;
-  MSG_INFO("\t --- End Dumping optionMap ---\n\n");
-}
-
 /** Generate list of files to analyse
     dataPath : folder path to data
     fExt file : extension to look for
     optionMap : Options to populate
   */
-int createListDataFiles(const std::string &dataPath, const std::string fExt, Options &optionMap){
+int createListDataFiles(const std::string &dataPath, const std::string fExt, Json::Value &fileValues){
   DIR *dir;
   struct dirent *ent;
-  Json::Value fileValues;
   if ((dir = opendir (dataPath.c_str())) != NULL) {
     while ((ent = readdir (dir)) != NULL) {
       std::string fName = ent->d_name;
@@ -81,7 +61,6 @@ int createListDataFiles(const std::string &dataPath, const std::string fExt, Opt
         }
       }
     }
-    optionMap["dataFiles"] = fileValues;
     closedir (dir);
     return -1;
   } else {
@@ -97,18 +76,19 @@ int main(int argc, char* argv[]){
         cout<<"OR :    "<< argv[0] <<" <configFile> <muonpeakstart> <muonpeakend>\n";
         return 1;
     } else {
-        Options optionMap;
-        printOptions(optionMap);
-        if( -1 != loadJsonFile(argv[1], options)){
+        Json::Value root; // Will contain the root of Json file
+        if( -1 != loadJsonFile(argv[1], root)){
+          return EXIT_FAILURE;
+        }
+        // Print  content of the option file
+        std::cout << root << std::endl;
+        
+        Json::Value fileValues = root["Global"].get("dataFiles","");
+        if( -1 != createListDataFiles(root["Global"].get("DataPath","nowhere").asString(), ".dat", fileValues)){        
           return EXIT_FAILURE;
         }
         
-        if( -1 != createListDataFiles(roptionMap["dataPath"].asString(), ".dat", optionMap)){
-          return EXIT_FAILURE;
-        }
-        
-        createListDataFiles(optionMap["dataPath"].asString(), ".dat", optionMap);
-        if (optionMap["dataFiles"].empty())
+        if (fileValues.empty())
         {
           MSG_ERROR("Didn't find no files to analyse!!!\n");
           return EXIT_FAILURE;
@@ -119,22 +99,22 @@ int main(int argc, char* argv[]){
         {
             float start  = strtof(argv[2],NULL);
             float end    = strtof(argv[3],NULL);
-            optionMap["startTimeCut"] = start;
-            optionMap["endTimeCut"] = end;
+            root["Clusters"]["StartTimeCut"] = start;
+            root["Clusters"]["EndTimeCut"] = end;
         }
         
-        for(const auto &fName: optionMap["dataFiles"])
+        for(auto &fName: fileValues)
         {
           //Sort the data by time stamp and
           //divide it into X readout and Y
           //readout data
-          if (-1 != SortData(fName.asString(), optionMap))
+          if (-1 != SortData(fName.asString(), root))
           {
             MSG_ERROR("Failed to sort the data, exiting...\n");
             return EXIT_FAILURE;
           }
           //Clusterize data files and make histograms
-          if (-1 != Analyse(fName.asString(), optionMap))
+          if (-1 != Analyse(fName.asString(), root))
           {
             MSG_ERROR("Failed to sort the data, exiting...\n");
             return EXIT_FAILURE;

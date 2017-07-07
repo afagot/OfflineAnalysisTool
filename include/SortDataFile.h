@@ -17,6 +17,7 @@
 #include <string>
 #include <ctime>
 #include <limits>
+#include <json/json.h>
 
 #include "Clusters.h"
 
@@ -28,6 +29,6 @@ int RandomPivot(int first,int last);
 int Partition(Cluster& A, int f, int l, string option);
 void SortEvent(Cluster& A, int f, int l, string option);
 // void SortData(string fName, int nStrips); // Old
-int SortData(string fName, Options &optionMap);
+int SortData(string fName, const Json::Value &options);
 
 #endif // SORTDATAFILE_H

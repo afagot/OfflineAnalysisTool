@@ -119,10 +119,9 @@ void SortEvent(Cluster& A, int f, int l, string option){
 
 //with a line of 0s in between each event (trigger).
 
-int SortData(string fName, Options &optionMap){
+int SortData(string fName, Json::Value &options){
     string HVstep = GetVoltage(fName)+"V_";              //Extract voltage step from file header.
-    int nStrips = optionMap["nStrips"].asInt();
-    
+    int nStrips = options["Global"].get("NStrips",-1).asInt();
     ifstream rawFile(fName.c_str(),ios::in);            //Open data file in read mode.
 
     if(rawFile.is_open()){
@@ -138,7 +137,7 @@ int SortData(string fName, Options &optionMap){
         YData.clear();                                  //each event in Y readout.
         
 
-        if (-1 != createDir( optionMap["dataPath"].asString() + "DAT/"))
+        if (-1 != createDir( options["Global"].get("DataPath","nowhere").asString() + "DAT/"))
           return(EXIT_FAILURE);
         
         unsigned NameInPath = fName.find_last_of("/")+1;

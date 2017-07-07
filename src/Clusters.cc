@@ -160,10 +160,10 @@ float Get1DClusterCenter(Cluster cluster){
 //each event.
 
 // void Analyse(string fName, int nStrips, float start, float end){
-int Analyse(string fName, Options &optionMap){
-    int nStrips = optionMap["nStrips"].asInt();
-    float start = optionMap["startTimeCut"].asFloat();
-    float end = optionMap["endTimeCut"].asFloat();
+int Analyse(const string fName, Json::Value &options){
+    int nStrips = options["Global"].get("NStrips",-1).asInt();
+    float start = options["Clusters"].get("StartTimeCut",-1).asFloat();
+    float end = options["Clusters"].get("EndTimeCut",-1).asFloat();
     float window = end - start;
     
 

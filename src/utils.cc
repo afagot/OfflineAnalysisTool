@@ -202,3 +202,21 @@ int createDir(std::string dirPath){
       return(EXIT_FAILURE);
   }
 }
+
+Options::Options(Json::Value &options){
+  m_dataPath  = options["Global"].get("DataPath","nowhere").asString();
+  m_nStrips   = options["Global"].get("NStrips","100").asInt();
+
+  // Cut on Strip
+  m_xStripMin = options["SortData"].get("XStripMin",-1).asInt();
+  m_xStripMax = options["SortData"].get("XStripMax",100).asInt();
+  m_yStripMin = options["SortData"].get("YStripMin",-1).asInt();
+  m_yStripMax = options["SortData"].get("YStripMax",100).asInt();
+  
+  // Cut on max hit
+  m_xNHitMax = options["SortData"].get("XNHitMax",500).asInt();
+  m_yNHitMax = options["SortData"].get("YNHitMax",500).asInt(); 
+  
+  m_startTimeCut = options["CLusters"].get("StartTimeCut",-1).asFloat();
+  m_endTimeCut   = options["Clusters"].get("EndTimeCut",-1).asFloat(); 
+}

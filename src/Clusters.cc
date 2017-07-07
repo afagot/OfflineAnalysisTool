@@ -158,12 +158,10 @@ float Get1DClusterCenter(Cluster cluster){
 //Function that analyses a file containing data with hits sorted by time stamp
 //in each event to make a new outputfile the the hits grouped as clusters in
 //each event.
-
-// void Analyse(string fName, int nStrips, float start, float end){
-int Analyse(const string fName, Json::Value &options){
-    int nStrips = options["Global"].get("NStrips",-1).asInt();
-    float start = options["Clusters"].get("StartTimeCut",-1).asFloat();
-    float end = options["Clusters"].get("EndTimeCut",-1).asFloat();
+int Analyse(const string fName, Options &options){
+    int &nStrips = options.m_nStrips;
+    float &start = options.m_startTimeCut;
+    float &end = options.m_endTimeCut;
     float window = end - start;
     
 

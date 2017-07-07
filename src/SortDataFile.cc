@@ -119,22 +119,8 @@ void SortEvent(Cluster& A, int f, int l, string option){
 
 //with a line of 0s in between each event (trigger).
 
-void loadOptions(const Json::Value &options){
-  m_nStrips = options["Global"].get("NStrips",-1).asInt();
-  // Cut on Strip
-  m_xStripMin = options["SortData"].get("XStripMin",-1).asInt();
-  m_xStripMax = options["SortData"].get("XStripMax",100).asInt();
-  m_yStripMin = options["SortData"].get("YStripMin",-1).asInt();
-  m_yStripMax = options["SortData"].get("YStripMax",100).asInt();
-  
-  // Cut on max hit
-  m_xNHitMax =  options["SortData"].get("XNHitMax",500).asInt();
-  m_yNHitMax =  options["SortData"].get("YNHitMax",500).asInt();  
-}
-
-int SortData(string fName, Json::Value &options){
+int SortData(string fName, const Options &options){
     string HVstep = GetVoltage(fName)+"V_";              //Extract voltage step from file header.
-    loadOptions(options);
     ifstream rawFile(fName.c_str(),ios::in);            //Open data file in read mode.
 
     if(rawFile.is_open()){
@@ -150,7 +136,7 @@ int SortData(string fName, Json::Value &options){
         YData.clear();                                  //each event in Y readout.
         
 
-        if (-1 != createDir( options["Global"].get("DataPath","nowhere").asString() + "DAT/"))
+        if (-1 != createDir( options.m_dataPath + "DAT/"))
           return(EXIT_FAILURE);
         
         unsigned NameInPath = fName.find_last_of("/")+1;
@@ -174,13 +160,13 @@ int SortData(string fName, Json::Value &options){
                     float time = -1;
 
                     rawFile >> strip >> time;       //Save data pairs into the array.
-                    if(strip < m_nStrips && (strip >= m_xStripMin && strip <= m_xStripMax)){
+                    if(strip < options.m_nStrips && (strip >= options.m_xStripMin && strip <= options.m_xStripMax)){
                           XData.push_back(make_pair(strip,time));
-                    } else if(strip < 2*m_nStrips && (strip >= m_yStripMin && strip <= m_yStripMax)){
+                    } else if(strip < 2*options.m_nStrips && (strip >= options.m_yStripMin && strip <= options.m_yStripMax)){
                           YData.push_back(make_pair(strip,time));
                     } else{
                         std::ostringstream oss;
-                        oss << "Found hit in strip '" << strip << "' But only '" << 2*m_nStrips <<"' were defined.\n";
+                        oss << "Found hit in strip '" << strip << "' But only '" << 2*options.m_nStrips <<"' were defined.\n";
                         MSG_WARNING("%s",oss.str().c_str());
                         return EXIT_FAILURE;
                     }
@@ -189,9 +175,9 @@ int SortData(string fName, Json::Value &options){
                 //Sort the arrays per time stamp and print the sorted data
                 //add a cut at nHits == 5
               //  if(YData.size() <= 5){
-                    if(XData.size() > 1 && XData.size() <= m_xNHitMax)
+                    if(XData.size() > 1 && XData.size() <= options.m_xNHitMax)
                       SortEvent(XData,0,XData.size()-1,"TIME");
-                    if(YData.size() > 1 && YData.size() <= m_yNHitMax)
+                    if(YData.size() > 1 && YData.size() <= options.m_yNHitMax)
                       SortEvent(YData,0,YData.size()-1,"TIME");
 
                     sortedFile << nEvent << '\t' << XData.size() << '\t' << YData.size() << endl;

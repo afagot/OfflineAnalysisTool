@@ -9,10 +9,10 @@
 #include <sstream>
 #include <json/json.h>
 
-#include "../include/SortDataFile.h"
-#include "../include/Clusters.h"
-#include "../include/utils.h"
-#include "../include/MsgSvc.h"
+#include "SortDataFile.h"
+#include "Clusters.h"
+#include "utils.h"
+#include "MsgSvc.h"
 
 
 using namespace std;
@@ -103,18 +103,19 @@ int main(int argc, char* argv[]){
             root["Clusters"]["EndTimeCut"] = end;
         }
         
+        Options options(root);
         for(auto &fName: fileValues)
         {
           //Sort the data by time stamp and
           //divide it into X readout and Y
           //readout data
-          if (-1 != SortData(fName.asString(), root))
+          if (-1 != SortData(fName.asString(), options))
           {
             MSG_ERROR("Failed to sort the data, exiting...\n");
             return EXIT_FAILURE;
           }
           //Clusterize data files and make histograms
-          if (-1 != Analyse(fName.asString(), root))
+          if (-1 != Analyse(fName.asString(), options))
           {
             MSG_ERROR("Failed to sort the data, exiting...\n");
             return EXIT_FAILURE;

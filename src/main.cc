@@ -23,19 +23,16 @@ int main(int argc, char* argv[]){
         cout<<"OR :    "<< argv[0] <<" <configFile> <muonpeakstart> <muonpeakend>\n";
         return 1;
     } else {
-        Json::Value root; // Will contain the root of Json file
-        if( -1 != loadJsonFile(argv[1], root)){
-          return EXIT_FAILURE;
-        }
+        Options options(argv[1]);
+
         // Print  content of the option file
-        std::cout << root << std::endl;
+        options.dump();
         
-        Json::Value fileValues = root["Global"]["DataFiles"];
-        if( -1 != createListDataFiles(root["Global"].get("DataPath","nowhere").asString(), ".dat", fileValues)){        
+        if( -1 != createListDataFiles(options.m_dataPath, ".dat", options.m_dataFiles)){        
           return EXIT_FAILURE;
         }
         
-        if (fileValues.empty())
+        if (options.m_dataFiles.empty())
         {
           MSG_ERROR("Didn't find no files to analyse!!!\n");
           return EXIT_FAILURE;
@@ -46,12 +43,11 @@ int main(int argc, char* argv[]){
         {
             float start  = strtof(argv[2],NULL);
             float end    = strtof(argv[3],NULL);
-            root["Clusters"]["StartTimeCut"] = start;
-            root["Clusters"]["EndTimeCut"] = end;
+            options.m_startTimeCut = start;
+            options.m_endTimeCut = end;
         }
         
-        Options options(root);
-        for(auto &fName: fileValues)
+        for(auto &fName: options.m_dataFiles)
         {
           //Sort the data by time stamp and
           //divide it into X readout and Y

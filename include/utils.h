@@ -33,15 +33,19 @@ int Partition(Cluster& A, int f, int l, string option);
 void SortEvent(Cluster& A, int f, int l, string option);
 
 int createListDataFiles(const std::string &dataPath, const std::string &fExt, Json::Value &fileValues);
-int loadJsonFile(const std::string &fileName, Json::Value &root);
 
 class Options{
 public:
-  Options(Json::Value &options);
+  Options(const std::string &fileName);
   ~Options(){;}
+  void dump();
   
+    Json::Value m_root;
+  int loadJsonFile(const std::string &fileName);
+public:
   // Global
   std::string m_dataPath;
+  Json::Value m_dataFiles;
   int m_nStrips;
   
   //SortData

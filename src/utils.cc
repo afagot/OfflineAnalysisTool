@@ -276,32 +276,6 @@ int createDir(std::string dirPath){
   }
 }
 
-int loadJsonFile(const std::string& fileName, Json::Value &root){
-  if (fileName.empty())
-  {
-    MSG_ERROR("Please provide a config file");
-    return EXIT_FAILURE;
-  }    
-  
-  Json::Reader reader;
-  // Json::Value root;   // 'root' will contain the root value after parsing.
-  std::ifstream ifs (fileName.c_str(), std::ifstream::in);
-  if (!ifs.good()){
-    MSG_ERROR("Failed to open file '%s' \n",fileName.c_str());
-    return EXIT_FAILURE;
-  }
-  
-  bool isParsed = reader.parse(ifs, root, false);
-  if(!isParsed)
-  {
-    // Report failures and their locations in the document.
-    MSG_ERROR("Failed to parse JSON\n%s\n",reader.getFormatedErrorMessages().c_str());
-    return EXIT_FAILURE;
-  }
-  
-  Json::StyledWriter styledWriter;
-  return -1;
-}
 
 /** Generate list of files to analyse
     dataPath : folder path to data
@@ -331,20 +305,53 @@ int createListDataFiles(const std::string &dataPath, const std::string &fExt, Js
   }
 }
 
-Options::Options(Json::Value &options){
-  m_dataPath  = options["Global"].get("DataPath","nowhere").asString();
-  m_nStrips   = options["Global"].get("NStrips","100").asInt();
+Options::Options(const std::string &fileName){
+  if( -1 != loadJsonFile(fileName)){
+    exit(EXIT_FAILURE);
+  } 
+  m_dataPath  = m_root["Global"].get("DataPath","nowhere").asString();
+  m_dataFiles = m_root["Global"]["DataFiles"];
+  m_nStrips   = m_root["Global"].get("NStrips","100").asInt();
 
   // Cut on Strip
-  m_xStripMin = options["SortData"].get("XStripMin",-1).asInt();
-  m_xStripMax = options["SortData"].get("XStripMax",100).asInt();
-  m_yStripMin = options["SortData"].get("YStripMin",-1).asInt();
-  m_yStripMax = options["SortData"].get("YStripMax",100).asInt();
+  m_xStripMin = m_root["SortData"].get("XStripMin",-1).asInt();
+  m_xStripMax = m_root["SortData"].get("XStripMax",100).asInt();
+  m_yStripMin = m_root["SortData"].get("YStripMin",-1).asInt();
+  m_yStripMax = m_root["SortData"].get("YStripMax",100).asInt();
   
   // Cut on max hit
-  m_xNHitMax = options["SortData"].get("XNHitMax",500).asInt();
-  m_yNHitMax = options["SortData"].get("YNHitMax",500).asInt(); 
+  m_xNHitMax = m_root["SortData"].get("XNHitMax",500).asInt();
+  m_yNHitMax = m_root["SortData"].get("YNHitMax",500).asInt(); 
   
-  m_startTimeCut = options["CLusters"].get("StartTimeCut",-1).asFloat();
-  m_endTimeCut   = options["Clusters"].get("EndTimeCut",-1).asFloat(); 
+  m_startTimeCut = m_root["Clusters"].get("StartTimeCut",-1).asFloat();
+  m_endTimeCut   = m_root["Clusters"].get("EndTimeCut",-1).asFloat(); 
+}
+
+void Options::dump(){
+  Json::StyledWriter styledWriter;
+  std::cout << m_root << std::endl; 
+}
+int Options::loadJsonFile(const std::string& fileName){
+  if (fileName.empty())
+  {
+    MSG_ERROR("Please provide a config file\n");
+    return EXIT_FAILURE;
+  }    
+  
+  Json::Reader reader;
+  std::ifstream ifs (fileName.c_str(), std::ifstream::in);
+  if (!ifs.good()){
+    MSG_ERROR("Failed to open file '%s' \n",fileName.c_str());
+    return EXIT_FAILURE;
+  }
+  
+  bool isParsed = reader.parse(ifs, m_root, false);
+  if(!isParsed)
+  {
+    // Report failures and their locations in the document.
+    MSG_ERROR("Failed to parse JSON\n%s\n",reader.getFormatedErrorMessages().c_str());
+    return EXIT_FAILURE;
+  }
+  
+  return -1;
 }

@@ -29,7 +29,8 @@ typedef vector<int> eStrips;                //List of fired strips per event
 typedef vector<float> eTimes;               //List of hit time stamps per event
 typedef vector<eStrips> esList;             //List of eStrip
 typedef vector<eTimes> etList;              //List of eTime
-typedef vector< pair<int,float> > Cluster;  //List of strip + time stamps grouped as cluster
+// Cluster is now defined in utils
+// typedef vector< pair<int,float> > Cluster;  //List of strip + time stamps grouped as cluster
 typedef vector<Cluster> ClusterList;        //List of clusters
 
 struct RAWData{

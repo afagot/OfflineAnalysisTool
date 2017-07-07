@@ -4,10 +4,11 @@
 // *   27/02/2017
 // *********************************************************************
 
-#include "../include/SortDataFile.h"
-#include "../include/MsgSvc.h"
-#include "../include/utils.h"
 #include <sstream>
+
+#include "SortDataFile.h"
+#include "MsgSvc.h"
+#include "utils.h"
 
 
 using namespace std;
@@ -18,80 +19,6 @@ ifstream &GotoLine(ifstream& file, unsigned int line){
         file.ignore(numeric_limits<streamsize>::max(),'\n');
     }
     return file;
-}
-
-//*************************************************************************************
-
-//TDCs give 2 informations :
-//  - Channel (that leads to the strip)
-//  - Time stamp
-//This function allows to sort data pairs by increasing strip number ortime stamp
-//depending on an option.
-
-//To sort the data, a quicksort algorithm is used. It consists in 3 steps :
-
-//  1- Pick an element from the array A called Pivot (p) between its first (f) and
-//last (l) element.
-//  2- Reorder A so that all elements that all elements with values less than p come
-//before p, while all elements with values greater than p come after it (equal values
-//can go either way). After this partitionning, p is in its final position. This is
-//called the Partition operation. In our case, this operation is released on the
-//  3- Recursively apply the above steps to the sub-array of elements with smaller
-//values and separately to the sub-array of elements with greater values.
-
-//*************************************************************************************
-
-int RandomPivot(int first,int last){        //Return a random element index in range
-    return rand()%(last-first)+first;       //[first;last]
-}
-
-//*************************************************************************************
-
-int Partition(Cluster& A, int f, int l, string option){
-    pair<int,float> tPair;                  //Temporary pair to help swaping elements.
-
-    int p = RandomPivot(f,l);               //Pick a random element as pivot and then
-    tPair = A[p];                           //swap the pivot element with the last one.
-    A[p] = A[l];
-    A[l] = tPair;
-
-    int j = f;                              //j starts at the first element of the array
-                                            //or sub-array you want to sort. Every time
-                                            //you find an element lower than the pivot,
-                                            //you increment j.
-                                            //At the end, j corresponds to the final of
-                                            //the pivot.
-
-    for(int i=f; i<l; i++){                 //If element i is smaller than the pivot :
-        if((option == "STRIP" && A[i].first < A[l].first) || (option == "TIME" && A[i].second < A[l].second)){
-            tPair = A[i];                   //swap the element i with the element j
-            A[i] = A[j];                    //which is the last element that was greater
-            A[j] = tPair;                   //than the pivot.
-            j++;                            //Increment j.
-        }
-    }
-
-    tPair = A[j];                           //Finally swap element j which is greater
-    A[j] = A[l];                            //than the pivot and the pivot. p is now
-    A[l] = tPair;                           //at its final position j.
-    return j;                               //Return the final position of the pivot.
-}
-
-//*************************************************************************************
-
-void SortEvent(Cluster& A, int f, int l, string option){
-    if(f < l){
-        int pivot = Partition(A,f,l,option);//Partition your array and get the pivot.
-        if(A.size() > 2){
-            if(pivot != f)
-                SortEvent(A,f,pivot-1,option);//Partition the lower sub-array.
-            if(pivot != l)
-                SortEvent(A,pivot+1,l,option);//Partition the greater sub-array.
-        }
-    } else if (f > l){
-        MSG_ERROR("Problem with the indexes : first index f > last index l\n");
-        exit(EXIT_FAILURE);
-    }
 }
 
 //*************************************************************************************

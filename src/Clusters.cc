@@ -4,10 +4,9 @@
 // *   27/02/2017
 // *********************************************************************
 
-#include "../include/Clusters.h"
-#include "../include/SortDataFile.h"
-#include "../include/MsgSvc.h"
-#include "../include/utils.h"
+#include "Clusters.h"
+#include "MsgSvc.h"
+#include "utils.h"
 
 #include "TFile.h"
 #include "TTree.h"

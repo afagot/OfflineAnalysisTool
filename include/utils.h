@@ -16,6 +16,7 @@
 #include "TCanvas.h"
 
 using namespace std;
+typedef vector< pair<int,float> > Cluster;  //List of strip + time stamps grouped as cluster
 
 string          intToString(int value);
 string          longTostring(long value);
@@ -27,6 +28,9 @@ float           GetTH1StdDev(TH1* H);
 void            DrawTH1(TCanvas* C, TH1* H, string xtitle, string ytitle, string option);
 void            DrawTH2(TCanvas* C, TH2* H, string xtitle, string ytitle, string ztitle, string option);
 int createDir(std::string dirPath);
+int RandomPivot(int first,int last);
+int Partition(Cluster& A, int f, int l, string option);
+void SortEvent(Cluster& A, int f, int l, string option);
 
 class Options{
 public:

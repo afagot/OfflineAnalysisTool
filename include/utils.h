@@ -27,12 +27,23 @@ float           GetTH1Mean(TH1* H);
 float           GetTH1StdDev(TH1* H);
 void            DrawTH1(TCanvas* C, TH1* H, string xtitle, string ytitle, string option);
 void            DrawTH2(TCanvas* C, TH2* H, string xtitle, string ytitle, string ztitle, string option);
-int createDir(std::string dirPath);
+
 int RandomPivot(int first,int last);
 int Partition(Cluster& A, int f, int l, string option);
 void SortEvent(Cluster& A, int f, int l, string option);
 
+/** if dirPath already exist do nothing
+return status code
+*/
+int createDir(std::string dirPath);
+
+/** Generate list of files to analyse
+    dataPath : folder path to data
+    fExt file : extension to look for
+    fileValues : jsonValue to populate
+  */
 int createListDataFiles(const std::string &dataPath, const std::string &fExt, Json::Value &fileValues);
+
 
 class Options{
 public:
@@ -40,8 +51,12 @@ public:
   ~Options(){;}
   void dump();
   
+private:
+  /** Load fileName into Json buffer
+    */
     Json::Value m_root;
   int loadJsonFile(const std::string &fileName);
+
 public:
   // Global
   std::string m_dataPath;

@@ -46,6 +46,7 @@ ifstream &GotoLine(ifstream& file, unsigned int line){
 
 //with a line of 0s in between each event (trigger).
 
+//-------------------------------------------------------------------------------------------------
 int SortData(string fName, const Options &options){
     string HVstep = GetVoltage(fName)+"V_";              //Extract voltage step from file header.
     ifstream rawFile(fName.c_str(),ios::in);            //Open data file in read mode.
@@ -116,7 +117,7 @@ int SortData(string fName, const Options &options){
                     for(unsigned int h = 0; h < YData.size(); h++){
                         sortedFile << '\t' << YData[h].first << '\t' << YData[h].second << endl;
                     }
-//                }
+              //  }
                 XData.clear();
                 YData.clear();
             }

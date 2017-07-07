@@ -245,10 +245,8 @@ void DrawTH2(TCanvas* C, TH2* H, string xtitle, string ytitle, string ztitle, st
     C->Update();
 }
 
-  /** 
-      if dirPath already exist do nothing
-      return status code
-    */
+
+//-------------------------------------------------------------------------------------------------
 int createDir(std::string dirPath){
   DIR* dir = opendir(dirPath.c_str());
   if (dir)
@@ -277,11 +275,8 @@ int createDir(std::string dirPath){
 }
 
 
-/** Generate list of files to analyse
-    dataPath : folder path to data
-    fExt file : extension to look for
-    optionMap : Options to populate
-  */
+
+//-------------------------------------------------------------------------------------------------
 int createListDataFiles(const std::string &dataPath, const std::string &fExt, Json::Value &fileValues){
   DIR *dir;
   struct dirent *ent;
@@ -300,11 +295,15 @@ int createListDataFiles(const std::string &dataPath, const std::string &fExt, Js
     return -1;
   } else {
     /* could not open directory */
-    MSG_ERROR ("Could not open directory '%s'",dataPath.c_str());
+    MSG_ERROR ("Could not open directory '%s'\n",dataPath.c_str());
     return EXIT_FAILURE;
   }
 }
 
+
+//-------------------------------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 Options::Options(const std::string &fileName){
   if( -1 != loadJsonFile(fileName)){
     exit(EXIT_FAILURE);
@@ -327,10 +326,20 @@ Options::Options(const std::string &fileName){
   m_endTimeCut   = m_root["Clusters"].get("EndTimeCut",-1).asFloat(); 
 }
 
+//-------------------------------------------------------------------------------------------------
 void Options::dump(){
   Json::StyledWriter styledWriter;
-  std::cout << m_root << std::endl; 
+  std::cout << "\n\t--- Dumping options --- \n";
+  char chars[] ="{,}";
+  std::string strOptions = m_root.toStyledString();
+  for (unsigned int i = 0; i < strlen(chars); ++i)
+  {
+    strOptions.erase(std::remove(strOptions.begin(), strOptions.end(), chars[i]), strOptions.end());
+  }
+  std::cout << strOptions << std::endl; 
+  std::cout << "\n\t--- Dumping done --- \n";
 }
+//-------------------------------------------------------------------------------------------------
 int Options::loadJsonFile(const std::string& fileName){
   if (fileName.empty())
   {

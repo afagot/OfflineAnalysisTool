@@ -358,7 +358,7 @@ int Options::loadJsonFile(const std::string& fileName){
   if(!isParsed)
   {
     // Report failures and their locations in the document.
-    MSG_ERROR("Failed to parse JSON\n%s\n",reader.getFormatedErrorMessages().c_str());
+    MSG_ERROR("Failed to parse JSON\n%s\n",reader.getFormattedErrorMessages().c_str());
     return EXIT_FAILURE;
   }
   

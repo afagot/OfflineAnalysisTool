@@ -12,7 +12,7 @@
 #include <map>
 #include <sys/stat.h>
 #include <dirent.h>
-
+#include <algorithm> // std::remove
 
 #include "utils.h"
 #include "MsgSvc.h"

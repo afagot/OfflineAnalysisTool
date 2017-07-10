@@ -25,6 +25,27 @@ ENDIF()
 # Require proper c++
 SET( ${CMAKE_CXX_FLAGS} "${CMAKE_CXX_FLAGS} -pedantic -O2 -Wall -Werror" )
 
+# -------------------------------------------------
+# CMake magic for shared lib linking after install (https://cmake.org/Wiki/CMake_RPATH_handling)
+# add install path to the rpath list (apple)
+IF( APPLE )
+  SET( CMAKE_MACOSX_RPATH TRUE )
+ENDIF()
+
+# use, i.e. don't skip the full RPATH for the build tree
+SET(CMAKE_SKIP_BUILD_RPATH  FALSE)
+
+# when building, don't use the install RPATH already
+# (but later on when installing)
+SET(CMAKE_BUILD_WITH_INSTALL_RPATH FALSE) 
+SET(CMAKE_INSTALL_RPATH "${PROJECT_SOURCE_DIR}/lib")
+
+# add the automatically determined parts of the RPATH
+# which point to directories outside the build tree to the install RPATH
+SET(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
+# Enf of CMake magic
+# -------------------------------------------------
+
 
 # -------------------------------------------------
 # cmake macros to look for dependencies

@@ -120,6 +120,8 @@ int SortData(string fName, const Options &options){
                       SortEvent(YData,0,YData.size()-1,"TIME");
                       cutIsPassed = true;
                     }
+                    if (nHits == 0)
+                    cutIsPassed = true; // do not get rid of empty trigger, would cheat the efficiency otherwise
                     if (cutIsPassed){
                       sortedFile << nEvent << '\t' << XData.size() << '\t' << YData.size() << endl;
 

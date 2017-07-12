@@ -324,6 +324,14 @@ Options::Options(const std::string &fileName){
   
   m_startTimeCut = m_root["Clusters"].get("StartTimeCut",-1).asFloat();
   m_endTimeCut   = m_root["Clusters"].get("EndTimeCut",-1).asFloat(); 
+  
+  m_nSkipEvents     = m_root["Clusters"].get("SkipNEvents",-1).asInt();
+  m_maxEvent        = m_root["Clusters"].get("MaxEvents",-1).asInt();
+  m_xClusterSizeMax = m_root["Clusters"].get("XClusterSizeMax",-1).asInt();
+  m_xClusterSizeMin = m_root["Clusters"].get("XClusterSizeMin",-1).asInt();
+  m_yClusterSizeMax = m_root["Clusters"].get("YClusterSizeMax",-1).asInt();
+  m_yClusterSizeMin = m_root["Clusters"].get("YClusterSizeMin",-1).asInt();
+
 }
 
 //-------------------------------------------------------------------------------------------------

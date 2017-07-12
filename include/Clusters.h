@@ -48,6 +48,6 @@ float GetClusterStart(Cluster& cluster);
 bool  Is2DCluster(Cluster clusterX, Cluster clusterY);
 float Get1DClusterCenter(Cluster cluster);
 // void  Analyse(string fName, int nStrips, float start, float end); // Old
-int  Analyse(const string fName, Options &options);
+int  Analyse(const string fName, const Options &options);
 
 #endif // CLUSTERS_H

@@ -157,10 +157,10 @@ float Get1DClusterCenter(Cluster cluster){
 //Function that analyses a file containing data with hits sorted by time stamp
 //in each event to make a new outputfile the the hits grouped as clusters in
 //each event.
-int Analyse(const string fName, Options &options){
-    int &nStrips = options.m_nStrips;
-    float &start = options.m_startTimeCut;
-    float &end = options.m_endTimeCut;
+int Analyse(const string fName, const Options &options){
+    int nStrips = options.m_nStrips;
+    float start = options.m_startTimeCut;
+    float end = options.m_endTimeCut;
     float window = end - start;
     
 
@@ -407,11 +407,26 @@ int Analyse(const string fName, Options &options){
             ClusterListX.clear();
             ClusterListY.clear();
             ClusterListXY.clear();
-
+            
+            
             //Check if end of file
             if(nEvent == -1 && nHitsX == -1 && nHitsY == -1){
                 MSG_INFO("End of clusterization.\n");
-            } else {
+            }
+            else if ( nEvent >= options.m_maxEvent && options.m_maxEvent > 0 )
+            {
+              MSG_INFO("Reached max number of event to treat. End of clusterization at event %d.\n", nEvent);
+              break;
+            }
+            else if (nEvent > -1 && nEvent < options.m_nSkipEvents)
+            {
+              MSG_INFO("Skipping Event %d\n", nEvent);
+              int strip = -1;
+              float time = -1;
+              for (int i = 0 ; i< nHitsX+nHitsY; ++i)
+                input >> strip >> time;
+            }
+            else {
                 //Fill the RAWData vectors:
                 TDCData.EventList->push_back(nEvent);
                 TDCData.NHitsList->push_back(nHitsX+nHitsY);
@@ -543,9 +558,11 @@ int Analyse(const string fName, Options &options){
                 //Fill the 1D cluster multiplicity histograms
 
                 //For each 1D cluster on X readout
-                ClusterMultiplicityX->Fill(ClusterListX.size());
 
-                for(unsigned int x = 0; x<ClusterListX.size(); x++){
+                if(ClusterListY.size() < options.m_xClusterSizeMax)
+                {
+                  ClusterMultiplicityX->Fill(ClusterListX.size());  
+                  for(unsigned int x = 0; x<ClusterListX.size(); x++){
                     //Fill the 1D cluster histograms
                     //of X readout
                     float xCenter = Get1DClusterCenter(ClusterListX[x]);
@@ -565,10 +582,11 @@ int Analyse(const string fName, Options &options){
                         ClusterDiffX->Fill(lastXstamp-xTime);
                         ClusterDiffSizeX->Fill(lastXstamp-xTime,ClusterListX[x].size());
                     }
+                  }
                 }
 
                 //For each 1D cluster on Y readout
-              //  if(ClusterListY.size() < 5){
+               if(ClusterListY.size() < options.m_yClusterSizeMax){
                     ClusterMultiplicityY->Fill(ClusterListY.size());
 
                     for(unsigned int y = 0; y<ClusterListY.size(); y++){
@@ -592,10 +610,12 @@ int Analyse(const string fName, Options &options){
                             ClusterDiffSizeY->Fill(lastYstamp-yTime,ClusterListY[y].size());
                         }
                     }
-              //  }
+               }
 
                 //Loop over clusters and build 2D clusters
-                if(ClusterListX.size() > 0 && ClusterListY.size() > 0){
+                if( (ClusterListX.size() > 0 && ClusterListY.size() > 0)) 
+                  // && (ClusterListX.size() < options.m_xClusterSizeMax && ClusterListY.size() < options.m_yClusterSizeMax) )
+                {
                     //For each 1D cluster on X readout
                     for(unsigned int x = 0; x<ClusterListX.size(); x++){
                         //Check if the clusters on Y readout have a

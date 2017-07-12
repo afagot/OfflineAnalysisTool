@@ -17,5 +17,11 @@
   {
     "StartTimeCut": 0, 
     "EndTimeCut": 1000
+    "SkipNEvents" : 0,
+    "MaxEvents" : 0,
+    "XClusterSizeMax" : 10,
+    "XClusterSizeMin" : 0,
+    "YClusterSizeMax" : 10,
+    "YClusterSizeMin" : 0
   }
 }

@@ -7,6 +7,7 @@
 // *    07/03/2017
 //***************************************************************
 
+#include <iostream>
 #include <string>
 #include <vector>
 #include <json/json.h>
@@ -57,6 +58,38 @@ private:
     Json::Value m_root;
   int loadJsonFile(const std::string &fileName);
 
+Json::Value getValue(const Json::Value &root, const std::string &key)
+{
+    return root[key];
+}
+
+
+template <class T>
+Json::Value getOptionValue(std::string optionStr, T defaultValue)
+{
+  size_t pos = 0;
+  std::string token;
+  std::string delimiter = ".";
+  std::vector<std::string> keyList;
+  
+  while ((pos = optionStr.find(delimiter)) != std::string::npos) {
+    keyList.push_back(optionStr.substr(0, pos));
+    optionStr.erase(0, pos + delimiter.length());
+  }
+  
+  keyList.push_back(optionStr);
+  Json::Value root = m_root;
+  Json::Value value;
+  for (auto key = keyList.begin(); key != --keyList.end(); ++key)
+  {
+    value = getValue(root, *key);
+    root = value;
+  }
+  
+  std::string key = *(--keyList.end());
+  return value.get(key,defaultValue);
+}
+
 public:
   // Global
   std::string m_dataPath;
@@ -74,6 +107,13 @@ public:
   //Cluster
   float m_startTimeCut;
   float m_endTimeCut;
+  int m_nSkipEvents;
+  int m_maxEvent;
+  int m_xClusterSizeMax;
+  int m_xClusterSizeMin;
+  int m_yClusterSizeMax;
+  int m_yClusterSizeMin;
+
 };
 
 #endif // UTILS_H

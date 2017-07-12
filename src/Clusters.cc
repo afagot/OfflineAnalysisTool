@@ -177,6 +177,40 @@ void buildClusters(Cluster &TimeCluster, Cluster &StripCluster, ClusterList &clu
     TimeCluster.push_back(make_pair(strip,time));
   }
 }
+
+// Check if condition on cluster size are met
+bool checkClusterSizeCut(TH1F* const &TimeProfileX, const ClusterList &ClusterListX, TH1F* const  &TimeProfileY, const ClusterList &ClusterListY, const Options &options){
+  if (
+      (TimeProfileX->GetEntries() == 0 || // If X readout was not connected, check if Y readout is efficient
+      (ClusterListX.size() > options.m_xClusterSizeMin && ClusterListX.size() < options.m_xClusterSizeMax))
+      &&
+      (TimeProfileY->GetEntries() == 0 || // If Y readout was not connected, check if X readout is efficient
+      (ClusterListY.size() > options.m_yClusterSizeMin && ClusterListY.size() < options.m_yClusterSizeMax))
+     )
+    {
+      if (TimeProfileX->GetEntries() == 0 && TimeProfileY->GetEntries() == 0) // Empty trigger
+      { 
+        return false;
+      }
+      return true;
+    }
+    else
+    {
+      // MSG_ERROR("Not passing \n");
+      // std::cout << " TimeProfileX.GetEntries() " << TimeProfileX->GetEntries()
+      //           << " ClusterListX.size() " << ClusterListX.size() 
+      //           << " options.m_xClusterSizeMin " << options.m_xClusterSizeMin
+      //           << " options.m_xClusterSizeMax " << options.m_xClusterSizeMax
+      //           << " \nTimeProfileY.GetEntries() " << TimeProfileY->GetEntries()
+      //           << " ClusterListY.size() " << ClusterListY.size() 
+      //           << " options.m_yClusterSizeMin " << options.m_yClusterSizeMin
+      //           << " options.m_yClusterSizeMax " << options.m_yClusterSizeMax
+      //           <<std::endl;
+                 
+      return false;
+    }
+}
+
 //*****************************************************************************
 //Function that analyses a file containing data with hits sorted by time stamp
 //in each event to make a new outputfile the the hits grouped as clusters in
@@ -653,10 +687,11 @@ int Analyse(const string fName, const Options &options){
                 //The detector is defined as efficient is there was at least
                 //1 2D cluster
                 // if((ClusterListX.size() > 0 && ClusterListX.size() < 3) || (ClusterListY.size() > 0 && ClusterListY.size() < 3)) Efficiency->Fill(1);
-              //  if(ClusterListY.size() < 5){
-                    if(ClusterListY.size() > 0) Efficiency->Fill(1);
-                    else Efficiency->Fill(0);
-              //  }
+
+                if ( checkClusterSizeCut(TimeProfileX, ClusterListX, TimeProfileY, ClusterListY, options) )
+                  Efficiency->Fill(1);
+                else
+                  Efficiency->Fill(0);
 
                 //Push the list of strips and time stamps into TDCData
                 TDCData.ChannelList->push_back(tmpStrips);

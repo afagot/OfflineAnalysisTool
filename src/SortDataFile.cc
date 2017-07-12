@@ -88,11 +88,17 @@ int SortData(string fName, const Options &options){
                     float time = -1;
 
                     rawFile >> strip >> time;       //Save data pairs into the array.
-                    if(strip < options.m_nStrips && (strip >= options.m_xStripMin && strip <= options.m_xStripMax)){
-                          XData.push_back(make_pair(strip,time));
-                    } else if(strip < 2*options.m_nStrips && (strip >= options.m_yStripMin && strip <= options.m_yStripMax)){
+                    if(strip < options.m_nStrips)
+                    {
+                      if (strip >= options.m_xStripMin && strip <= options.m_xStripMax){
+                        XData.push_back(make_pair(strip,time));
+                      }
+                    } else if(strip < 2*options.m_nStrips)
+                    { 
+                      if (strip >= options.m_yStripMin && strip <= options.m_yStripMax){
                           YData.push_back(make_pair(strip,time));
-                    } else{
+                        }
+                    } else {
                         std::ostringstream oss;
                         oss << "Found hit in strip '" << strip << "' But only '" << 2*options.m_nStrips <<"' were defined.\n";
                         MSG_WARNING("%s",oss.str().c_str());

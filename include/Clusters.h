@@ -44,6 +44,7 @@ void  AddCluster2List(Cluster& cluster, ClusterList& cList);
 void  PrintClusters(int event, ClusterList& cList, ostream& output);
 bool  IsInCluster(int hit, Cluster cluster, string option);
 void  GroupStrips(Cluster &tCluster, Cluster& sCluster, ClusterList& cList);
+void buildClusters(Cluster &TimeCluster, Cluster &StripCluster, ClusterList &clusterList, const float &time, const int &strip);
 float GetClusterStart(Cluster& cluster);
 bool  Is2DCluster(Cluster clusterX, Cluster clusterY);
 float Get1DClusterCenter(Cluster cluster);

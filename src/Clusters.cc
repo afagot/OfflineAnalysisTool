@@ -153,6 +153,30 @@ float Get1DClusterCenter(Cluster cluster){
     return center;
 }
 
+void buildClusters(Cluster &TimeCluster, Cluster &StripCluster, ClusterList &clusterList, const float &time, const int &strip)
+{
+  //If the size if bigger than 0, the time
+  //cluster has already started to be filled
+  //Else that means that the current hit is
+  //the first one in the time cluster and is
+  //added into the cluster
+  if(TimeCluster.size() > 0){
+    //Resort the cluster
+    if(TimeCluster.size() > 1) SortEvent(TimeCluster,0,TimeCluster.size()-1,"TIME");
+    //Check if next hit is in time cluster
+    //else sort hits by strip number and
+    //group hits together into 1D clusters
+    if(IsInCluster(time,TimeCluster,"TIME")){
+      TimeCluster.push_back(make_pair(strip,time));
+    } else {
+      GroupStrips(TimeCluster,StripCluster,clusterList);
+      TimeCluster.clear();
+      TimeCluster.push_back(make_pair(strip,time));
+    }
+  } else {
+    TimeCluster.push_back(make_pair(strip,time));
+  }
+}
 //*****************************************************************************
 //Function that analyses a file containing data with hits sorted by time stamp
 //in each event to make a new outputfile the the hits grouped as clusters in
@@ -469,30 +493,7 @@ int Analyse(const string fName, const Options &options){
                                 //Fill the hit and time profile histograms
                                 StripProfileX->Fill(strip);
                                 TimeProfileX->Fill(time);
-
-                                //build clusters
-
-                                //If the size if bigger than 0, the time
-                                //cluster has already started to be filled
-                                //Else that means that the current hit is
-                                //the first one in the time cluster and is
-                                //added into the cluster
-                                if(TimeCluster.size() > 0){
-                                    //Resort the cluster
-                                    if(TimeCluster.size() > 1) SortEvent(TimeCluster,0,TimeCluster.size()-1,"TIME");
-                                    //Check if next hit is in time cluster
-                                    //else sort hits by strip number and
-                                    //group hits together into 1D clusters
-                                    if(IsInCluster(time,TimeCluster,"TIME")){
-                                        TimeCluster.push_back(make_pair(strip,time));
-                                    } else {
-                                        GroupStrips(TimeCluster,StripCluster,ClusterListX);
-                                        TimeCluster.clear();
-                                        TimeCluster.push_back(make_pair(strip,time));
-                                    }
-                                } else {
-                                    TimeCluster.push_back(make_pair(strip,time));
-                                }
+                                buildClusters(TimeCluster, StripCluster, ClusterListX, time, strip);
                             }
                         }
                     }
@@ -531,20 +532,7 @@ int Analyse(const string fName, const Options &options){
                                 //Fill the hit and time profile histograms
                                 StripProfileY->Fill(strip);
                                 TimeProfileY->Fill(time);
-
-                                //build clusters
-                                if(TimeCluster.size() > 0){
-                                    if(TimeCluster.size() > 1) SortEvent(TimeCluster,0,TimeCluster.size()-1,"TIME");
-                                    if(IsInCluster(time,TimeCluster,"TIME")){
-                                        TimeCluster.push_back(make_pair(strip,time));
-                                    } else {
-                                        GroupStrips(TimeCluster,StripCluster,ClusterListY);
-                                        TimeCluster.clear();
-                                        TimeCluster.push_back(make_pair(strip,time));
-                                    }
-                                } else {
-                                    TimeCluster.push_back(make_pair(strip,time));
-                                }
+                                buildClusters(TimeCluster, StripCluster, ClusterListY, time, strip);
                             }
                         }
                     }

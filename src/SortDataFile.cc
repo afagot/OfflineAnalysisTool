@@ -103,19 +103,27 @@ int SortData(string fName, const Options &options){
                 //Sort the arrays per time stamp and print the sorted data
                 //add a cut at nHits == 5
               //  if(YData.size() <= 5){
+                    bool cutIsPassed = false;
                     if(XData.size() > 1 && XData.size() <= options.m_xNHitMax)
+                    {
                       SortEvent(XData,0,XData.size()-1,"TIME");
-                    if(YData.size() > 1 && YData.size() <= options.m_yNHitMax)
-                      SortEvent(YData,0,YData.size()-1,"TIME");
-
-                    sortedFile << nEvent << '\t' << XData.size() << '\t' << YData.size() << endl;
-
-                    for(unsigned int h = 0; h < XData.size(); h++){
-                        sortedFile << '\t' << XData[h].first << '\t' << XData[h].second << endl;
+                      cutIsPassed = true;
                     }
+                    if(YData.size() > 1 && YData.size() <= options.m_yNHitMax)
+                    {
+                      SortEvent(YData,0,YData.size()-1,"TIME");
+                      cutIsPassed = true;
+                    }
+                    if (cutIsPassed){
+                      sortedFile << nEvent << '\t' << XData.size() << '\t' << YData.size() << endl;
 
-                    for(unsigned int h = 0; h < YData.size(); h++){
+                      for(unsigned int h = 0; h < XData.size(); h++){
+                        sortedFile << '\t' << XData[h].first << '\t' << XData[h].second << endl;
+                      }
+
+                      for(unsigned int h = 0; h < YData.size(); h++){
                         sortedFile << '\t' << YData[h].first << '\t' << YData[h].second << endl;
+                      }
                     }
               //  }
                 XData.clear();
